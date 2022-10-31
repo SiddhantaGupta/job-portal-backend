@@ -5,6 +5,7 @@ import { BoatModule } from '@libs/boat';
 import { ConsoleModule } from '@squareboat/nest-console';
 import { ObjectionModule } from '@squareboat/nestjs-objection';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UserModule,
     EventModule,
     ConsoleModule,
+    AuthModule
   ],
   controllers: [],
   providers: [],

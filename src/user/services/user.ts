@@ -7,7 +7,7 @@ import { UserModuleConstants } from '../constants';
 @Injectable()
 export class UserService {
   constructor(
-    @Inject(UserModuleConstants.userRepo) private users: UserRepositoryContract,
+    @Inject(UserModuleConstants.userRepo) public users: UserRepositoryContract,
   ) {}
 
   async get(): Promise<Record<string, any>> {
