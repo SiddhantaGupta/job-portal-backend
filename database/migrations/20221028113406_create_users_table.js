@@ -16,7 +16,7 @@ const {
           table.bigIncrements('id');
           table.string('uuid');
           table.integer('role');
-          table.string('email_id');
+          table.string('email');
           table.string('password');
           table.string('first_name');
           table.string('last_name');

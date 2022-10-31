@@ -1,10 +1,12 @@
 import { ResumeService, UserService } from "@app/user";
-import settings from "@config/settings";
+// import settings from "@config/settings";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import bcrypt from "bcrypt";
 import { JwtService } from '@nestjs/jwt';
 import crypto from 'crypto';
+import { BaseValidator } from "@libs/boat/validator";
+import { LoginDto, ResumeDto, SignupDto } from "../dto";
 
 @Injectable()
 export class AuthService {
@@ -15,13 +17,16 @@ export class AuthService {
        private readonly userService: UserService,
        private readonly  resumeService: ResumeService,
        private config: ConfigService,
-       private jwt: JwtService
+       private jwt: JwtService,
+       private validator: BaseValidator
     ) {
-        this.roles = settings().roles
     }
 
-    async signup(payload: any) {
+    async signup(payload: any): Promise<SignupDto> {
 
+        const validatedInputs = await this.validator.fire(payload.user, SignupDto)
+
+        const userRoles = this.config.get('settings.roles')
         payload.user.password = await bcrypt.hash(payload.user.password, 10);
         
         const user = await this.userService.users.query().insert({
@@ -30,7 +35,8 @@ export class AuthService {
             is_active: true
         })
 
-        if ( payload.user.role === this.roles.candidate ) {
+        if ( payload.user.role === userRoles.candidate ) {
+            const validatedInputs = await this.validator.fire(payload.resume, ResumeDto)
             const resume = await this.resumeService.resume.query().insert({
                 ...payload.resume
             })
@@ -40,10 +46,12 @@ export class AuthService {
         
     }
 
-    async login(payload: any) {
+    async login(payload: any): Promise<{ accessToken: string }> {
+
+        const validatedInputs = await this.validator.fire(payload, LoginDto)
 
         const user = await this.userService.users.query().findOne({
-            email_id: payload.email_id
+            email: payload.email
         })
 
         let result
@@ -62,7 +70,7 @@ export class AuthService {
 
     async signToken(
         uuid: string
-      ): Promise<{ access_token: string }> {
+      ): Promise<{ accessToken: string }> {
         const payload = {
           uuid: uuid
         };
@@ -77,7 +85,7 @@ export class AuthService {
         );
     
         return {
-          access_token: token,
+          accessToken: token,
         };
       }
     
