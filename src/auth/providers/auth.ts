@@ -1,92 +1,226 @@
-import { ResumeService, UserService } from "@app/user";
-// import settings from "@config/settings";
-import { ForbiddenException, Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import bcrypt from "bcrypt";
+import { ResumeService, UserService } from '@app/user';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import crypto from 'crypto';
-import { BaseValidator } from "@libs/boat/validator";
-import { LoginDto, ResumeDto, SignupDto } from "../dto";
+import { BaseValidator, validate } from '@libs/boat/validator';
+import { LoginDto, CandidateSignupDto, SignupDto, ForgotPasswordDto, ResetPasswordDto } from '../dto';
+import { uuid } from 'uuidv4';
+import { arrayBuffer } from 'stream/consumers';
+import { indexOf, pick } from 'lodash';
+import { ValidationFailed } from '@libs/boat';
 
 @Injectable()
 export class AuthService {
+  resetPasswordOtps: Array<{
+    otp: number;
+    createdAt: number;
+    email: string;
+  }> = [];
 
-    roles: any;
+  constructor(
+    private readonly userService: UserService,
+    private config: ConfigService,
+    private jwt: JwtService,
+    private validator: BaseValidator,
+  ) {}
 
-    constructor(
-       private readonly userService: UserService,
-       private readonly  resumeService: ResumeService,
-       private config: ConfigService,
-       private jwt: JwtService,
-       private validator: BaseValidator
+  async signup(payload: any): Promise<any> {
+    const userRoles = this.config.get('settings.roles');
+    let validatedInputs = null;
+    let userPayload = null;
+    let resumePayload = null;
+    if (payload.user.role === userRoles.candidate) {
+
+        validatedInputs = await this.validator.fire(payload.user, CandidateSignupDto);
+
+        userPayload = pick(validatedInputs, ['firstName', 'lastName', 'email', 'role', 'password', 'phoneNumber'])
+
+        resumePayload = pick(validatedInputs, ['experienceDuration', 'fieldOfWork', 'skills'])
+
+    } else {
+        validatedInputs = await this.validator.fire(payload.user, SignupDto);
+
+        userPayload = validatedInputs;
+    }
+
+
+    userPayload.password = await bcrypt.hash(payload.user.password, 10);
+
+    const user = await this.userService.repo.create({
+      uuid: uuid(),
+      ...userPayload,
+      is_active: true,
+    });
+
+    if ( resumePayload ) {
+      const resume = await this.userService.resumeRepo.create({
+        userId: user.id,
+        ...resumePayload,
+      });
+    }
+
+    return user;
+
+  }
+
+  async login(payload: any): Promise<{ accessToken: string }> {
+    const validatedInputs = await this.validator.fire(payload, LoginDto);
+
+    const user = await this.userService.repo.query().findOne({
+      email: validatedInputs.email,
+    });
+
+    let passwordVerified;
+    if (user) {
+      passwordVerified = await bcrypt.compare(validatedInputs.password, user.password);
+    }
+
+    if (!passwordVerified) {
+      throw new ForbiddenException('Credentials Incorrect');
+    }
+
+    return await this.signToken(user.uuid);
+  }
+
+  async signToken(uuid: string): Promise<{ accessToken: string }> {
+    const payload = {
+      uuid: uuid,
+    };
+    const secret = this.config.get('JWT_SECRET');
+
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: '120m',
+      secret: secret,
+    });
+
+    return {
+      accessToken: token,
+    };
+  }
+
+  async forgotPassword(payload: any): Promise<{
+    success: boolean,
+    message?: string,
+    otp?: number
+  }> {
+
+    const validatedInputs = await this.validator.fire(payload, ForgotPasswordDto);
+
+    const user = await this.userService.repo.query().findOne({
+      email: validatedInputs.email,
+    });
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'The user does not exist',
+      };
+    }
+
+    const otp = Math.floor(Math.random() * 10000000);
+
+    this.resetPasswordOtps.push({
+      otp,
+      createdAt: new Date().getTime(),
+      email: user.email,
+    });
+
+    return {
+      success: true,
+      otp,
+    };
+
+    // TODO: send reset password otp in to user.email
+  }
+
+  async resetPassword(payload: any): Promise<{
+    success: boolean,
+    message: string,
+  }> {
+    const validatedInputs = await this.validator.fire(payload, ResetPasswordDto);
+
+    let currentOtpDetails = null;
+    for (
+      let otpDetailsIndex = 0;
+      otpDetailsIndex < this.resetPasswordOtps.length;
+      otpDetailsIndex++
     ) {
-    }
-
-    async signup(payload: any): Promise<SignupDto> {
-
-        const validatedInputs = await this.validator.fire(payload.user, SignupDto)
-
-        const userRoles = this.config.get('settings.roles')
-        payload.user.password = await bcrypt.hash(payload.user.password, 10);
-        
-        const user = await this.userService.users.query().insert({
-            uuid: crypto.randomUUID(),
-            ...payload.user,
-            is_active: true
-        })
-
-        if ( payload.user.role === userRoles.candidate ) {
-            const validatedInputs = await this.validator.fire(payload.resume, ResumeDto)
-            const resume = await this.resumeService.resume.query().insert({
-                ...payload.resume
-            })
-        }
-
-        return user;
-        
-    }
-
-    async login(payload: any): Promise<{ accessToken: string }> {
-
-        const validatedInputs = await this.validator.fire(payload, LoginDto)
-
-        const user = await this.userService.users.query().findOne({
-            email: payload.email
-        })
-
-        let result
-        if ( user ) {
-            result = await bcrypt.compare(payload.password, user.password)
-        }
-
-        if ( !result ) {
-            throw new ForbiddenException(
-                'Credentials Incorrect'
-            )
-        }
-
-        return await this.signToken( user.uuid )
-    }
-
-    async signToken(
-        uuid: string
-      ): Promise<{ accessToken: string }> {
-        const payload = {
-          uuid: uuid
-        };
-        const secret = this.config.get('JWT_SECRET');
-    
-        const token = await this.jwt.signAsync(
-          payload,
-          {
-            expiresIn: '120m',
-            secret: secret,
-          },
-        );
-    
-        return {
-          accessToken: token,
-        };
+      const otpDetails = this.resetPasswordOtps[otpDetailsIndex];
+      if (otpDetails.otp === validatedInputs.otp) {
+        currentOtpDetails = otpDetails;
+        break;
       }
-    
+    }
+
+    // throw new ValidationFailed({
+    //     'otp':'INCORRECT OTP'
+    // })
+
+    // throw new UnauthorizedException('otp incoo')
+    if (!currentOtpDetails) {
+      return {
+        success: false,
+        message: 'The OTP is incorrect',
+      };
+    }
+
+    if (!(currentOtpDetails.email === validatedInputs.email)) {
+      return {
+        success: false,
+        message: 'The OTP is incorrect',
+      };
+    }
+
+    if (this.isOtpExpired(currentOtpDetails.createdAt, 60 * 60 * 60)) {
+      this.resetPasswordOtps.splice(
+        this.resetPasswordOtps.indexOf(currentOtpDetails),
+        1,
+      );
+      return {
+        success: false,
+        message: 'The OTP is incorrect',
+      };
+    }
+
+    if (validatedInputs.newPassword !== validatedInputs.confirmNewPassword) {
+      return {
+        success: false,
+        message: 'New Password does not match confirm New Password',
+      };
+    }
+
+    let newHashedPassword = await bcrypt.hash(validatedInputs.newPassword, 10);
+
+    const userUpdated = this.userService.repo
+      .query()
+      .findOne({
+        email: payload.email,
+      })
+      .patch({
+        password: newHashedPassword,
+      });
+
+    if (userUpdated) {
+      return {
+        success: true,
+        message: 'Password has been updated',
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Something went wrong. Please try again later.',
+      };
+    }
+  }
+
+  isOtpExpired(otpCreatedAt: number, durationOfExpiry: number): Boolean {
+    const expiryTime = otpCreatedAt + durationOfExpiry * 1000;
+
+    if (expiryTime - new Date().getTime() <= 0) {
+      return true;
+    }
+
+    return false;
+  }
 }

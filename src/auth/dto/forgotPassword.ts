@@ -5,13 +5,9 @@ import {
     IsString,
 } from 'class-validator';
   
-  export class LoginDto {
+  export class ForgotPasswordDto {
     @IsEmail()
     @IsNotEmpty()
     @Transform(({value})=>value.toLowerCase())
     email: string;
-  
-    @IsString()
-    @IsNotEmpty()
-    password: string;
 }

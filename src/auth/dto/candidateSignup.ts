@@ -3,8 +3,9 @@ import {
     IsNotEmpty,
     IsString,
 } from 'class-validator';
+import { SignupDto } from './signup';
 
-export class ResumeDto {
+export class CandidateSignupDto extends SignupDto {
     @IsEmail()
     @IsNotEmpty()
     @IsString()

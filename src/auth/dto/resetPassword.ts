@@ -1,20 +1,13 @@
-import { IsValueFromConfig } from '@libs/boat/validator';
 import { Transform } from 'class-transformer';
 import {
     IsEmail,
     IsNotEmpty,
-    IsPhoneNumber,
     IsString,
     MinLength,
 } from 'class-validator';
 import AuthModuleConstants from '../authModuleConstants';
   
-export class SignupDto {
-
-    @IsNotEmpty()
-    // @IsValueFromConfig({Key: 'settings.roles'})
-    role: number;
-
+  export class ResetPasswordDto {
     @IsEmail()
     @IsNotEmpty()
     @Transform(({value})=>value.toLowerCase())
@@ -23,19 +16,13 @@ export class SignupDto {
     @IsString()
     @IsNotEmpty()
     @MinLength(AuthModuleConstants.passwordLength)
-    password: string;
+    newPassword: string;
 
-    @IsNotEmpty()
     @IsString()
-    firstName: string;
+    @IsNotEmpty()
+    @MinLength(AuthModuleConstants.passwordLength)
+    confirmNewPassword: string;
 
     @IsNotEmpty()
-    @IsString()
-    lastName: string;
-
-    @IsNotEmpty()
-    @IsPhoneNumber()
-    phoneNumber: string;
-    
+    otp: number;
 }
-

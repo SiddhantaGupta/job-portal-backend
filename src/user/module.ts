@@ -19,7 +19,6 @@ import { ResumeService } from './services';
   ],
   exports:[
     UserService,
-    ResumeService
   ]
 })
 export class UserModule {}

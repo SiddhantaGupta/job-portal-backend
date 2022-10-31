@@ -30,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(
     console.log(payload)
 
     // fetch user from database
-    const user = await this.userService.users.query().findOne({
+    const user = await this.userService.repo.query().findOne({
         uuid: payload.uuid
     })
 
