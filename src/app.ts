@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/module';
 // import { CacheModule } from '@squareboat/nest-cache';
 import { CacheModule } from '@libs/cache';
+import { JobModule } from './job/module';
 
 @Module({
   imports: [
@@ -17,19 +18,6 @@ import { CacheModule } from '@libs/cache';
       useFactory: (config: ConfigService) => config.get('db'),
       inject: [ConfigService],
     }),
-    // CacheModule.register({
-    //   default: 'redis',
-    //   stores: {
-    //       redis: {
-    //           driver: 'redis',
-    //           host: process.env.REDIS_HOST,
-    //           password: process.env.REDIS_PASSWORD,
-    //           port: process.env.REDIS_PORT || 6379,
-    //           database: process.env.REDIS_DB || 0,
-    //           prefix: 'fp',
-    //       },
-    //     }
-    // }),
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
@@ -41,7 +29,8 @@ import { CacheModule } from '@libs/cache';
     UserModule,
     EventModule,
     ConsoleModule,
-    AuthModule
+    AuthModule,
+    JobModule
   ],
   controllers: [],
   providers: [],
