@@ -1,22 +1,26 @@
-import { ResumeService, UserService } from '@app/user';
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { UserService } from '@app/user';
+import {
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { BaseValidator, validate } from '@libs/boat/validator';
-import { LoginDto, CandidateSignupDto, SignupDto, ForgotPasswordDto, ResetPasswordDto } from '../dto';
+import {
+  LoginDto,
+  CandidateSignupDto,
+  SignupDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from '../dto';
 import { uuid } from 'uuidv4';
-import { arrayBuffer } from 'stream/consumers';
 import { indexOf, pick } from 'lodash';
 import { ValidationFailed } from '@libs/boat';
+import { CacheStore } from '@libs/cache';
 
 @Injectable()
 export class AuthService {
-  resetPasswordOtps: Array<{
-    otp: number;
-    createdAt: number;
-    email: string;
-  }> = [];
 
   constructor(
     private readonly userService: UserService,
@@ -30,22 +34,43 @@ export class AuthService {
     let validatedInputs = null;
     let userPayload = null;
     let resumePayload = null;
-    if (payload.user.role === userRoles.candidate) {
+    if (payload.role === userRoles.candidate) {
+      validatedInputs = await this.validator.fire(
+        payload,
+        CandidateSignupDto,
+      );
 
-        validatedInputs = await this.validator.fire(payload.user, CandidateSignupDto);
+      userPayload = pick(validatedInputs, [
+        'firstName',
+        'lastName',
+        'email',
+        'role',
+        'password',
+        'phoneNumber',
+      ]);
 
-        userPayload = pick(validatedInputs, ['firstName', 'lastName', 'email', 'role', 'password', 'phoneNumber'])
+      resumePayload = pick(validatedInputs, [
+        'experienceDuration',
+        'fieldOfWork',
+        'skills',
+      ]);
 
-        resumePayload = pick(validatedInputs, ['experienceDuration', 'fieldOfWork', 'skills'])
+      console.log(resumePayload)
 
     } else {
-        validatedInputs = await this.validator.fire(payload.user, SignupDto);
+      validatedInputs = await this.validator.fire(payload, SignupDto);
 
-        userPayload = validatedInputs;
+      userPayload = userPayload = pick(validatedInputs, [
+        'firstName',
+        'lastName',
+        'email',
+        'role',
+        'password',
+        'phoneNumber',
+      ]);;
     }
 
-
-    userPayload.password = await bcrypt.hash(payload.user.password, 10);
+    userPayload.password = await bcrypt.hash(userPayload.password, 10);
 
     const user = await this.userService.repo.create({
       uuid: uuid(),
@@ -53,27 +78,40 @@ export class AuthService {
       is_active: true,
     });
 
-    if ( resumePayload ) {
+    if (resumePayload) {
       const resume = await this.userService.resumeRepo.create({
         userId: user.id,
         ...resumePayload,
       });
+      console.log(resume)
     }
 
-    return user;
+    if (!user) {
+      return {
+        success: false,
+        message: 'Signup failed',
+      };
+    }
 
+    return await this.login({
+      email: validatedInputs.email,
+      password: validatedInputs.password,
+    });
   }
 
   async login(payload: any): Promise<{ accessToken: string }> {
     const validatedInputs = await this.validator.fire(payload, LoginDto);
 
-    const user = await this.userService.repo.query().findOne({
+    const user = await this.userService.repo.firstWhere({
       email: validatedInputs.email,
     });
 
     let passwordVerified;
     if (user) {
-      passwordVerified = await bcrypt.compare(validatedInputs.password, user.password);
+      passwordVerified = await bcrypt.compare(
+        validatedInputs.password,
+        user.password,
+      );
     }
 
     if (!passwordVerified) {
@@ -84,9 +122,7 @@ export class AuthService {
   }
 
   async signToken(uuid: string): Promise<{ accessToken: string }> {
-    const payload = {
-      uuid: uuid,
-    };
+    const payload = { uuid: uuid };
     const secret = this.config.get('JWT_SECRET');
 
     const token = await this.jwt.signAsync(payload, {
@@ -100,31 +136,28 @@ export class AuthService {
   }
 
   async forgotPassword(payload: any): Promise<{
-    success: boolean,
-    message?: string,
-    otp?: number
+    success: boolean;
+    message?: string;
+    otp?: number;
   }> {
-
-    const validatedInputs = await this.validator.fire(payload, ForgotPasswordDto);
+    const validatedInputs = await this.validator.fire(
+      payload,
+      ForgotPasswordDto,
+    );
 
     const user = await this.userService.repo.query().findOne({
       email: validatedInputs.email,
-    });
+    });     
 
     if (!user) {
-      return {
-        success: false,
-        message: 'The user does not exist',
-      };
+      throw new ValidationFailed({
+        'email': "Email does not exist"
+      })
     }
 
     const otp = Math.floor(Math.random() * 10000000);
 
-    this.resetPasswordOtps.push({
-      otp,
-      createdAt: new Date().getTime(),
-      email: user.email,
-    });
+    await CacheStore().set(`${validatedInputs.email}_password_reset_otp`, `${otp}`, 120);
 
     return {
       success: true,
@@ -135,71 +168,37 @@ export class AuthService {
   }
 
   async resetPassword(payload: any): Promise<{
-    success: boolean,
-    message: string,
+    success: boolean;
+    message: string;
   }> {
-    const validatedInputs = await this.validator.fire(payload, ResetPasswordDto);
+    const validatedInputs = await this.validator.fire(
+      payload,
+      ResetPasswordDto,
+    );
 
-    let currentOtpDetails = null;
-    for (
-      let otpDetailsIndex = 0;
-      otpDetailsIndex < this.resetPasswordOtps.length;
-      otpDetailsIndex++
-    ) {
-      const otpDetails = this.resetPasswordOtps[otpDetailsIndex];
-      if (otpDetails.otp === validatedInputs.otp) {
-        currentOtpDetails = otpDetails;
-        break;
-      }
-    }
+    let otpCheck = await CacheStore().has(`${validatedInputs.email}_password_reset_otp`)
 
-    // throw new ValidationFailed({
-    //     'otp':'INCORRECT OTP'
-    // })
-
-    // throw new UnauthorizedException('otp incoo')
-    if (!currentOtpDetails) {
-      return {
-        success: false,
-        message: 'The OTP is incorrect',
-      };
-    }
-
-    if (!(currentOtpDetails.email === validatedInputs.email)) {
-      return {
-        success: false,
-        message: 'The OTP is incorrect',
-      };
-    }
-
-    if (this.isOtpExpired(currentOtpDetails.createdAt, 60 * 60 * 60)) {
-      this.resetPasswordOtps.splice(
-        this.resetPasswordOtps.indexOf(currentOtpDetails),
-        1,
-      );
-      return {
-        success: false,
-        message: 'The OTP is incorrect',
-      };
+    if (!otpCheck) {
+      throw new ValidationFailed({
+        'otp':'Incorrect OTP'
+      })
     }
 
     if (validatedInputs.newPassword !== validatedInputs.confirmNewPassword) {
-      return {
-        success: false,
-        message: 'New Password does not match confirm New Password',
-      };
+      throw new ValidationFailed({
+        'newPassword': "New password does not match confirm password",
+        'confirmNewPassword': "Confirm password does not match new password"
+      })
     }
 
     let newHashedPassword = await bcrypt.hash(validatedInputs.newPassword, 10);
 
     const userUpdated = this.userService.repo
-      .query()
-      .findOne({
+      .updateWhere({
         email: payload.email,
+      }, {
+        password: newHashedPassword
       })
-      .patch({
-        password: newHashedPassword,
-      });
 
     if (userUpdated) {
       return {
@@ -212,15 +211,5 @@ export class AuthService {
         message: 'Something went wrong. Please try again later.',
       };
     }
-  }
-
-  isOtpExpired(otpCreatedAt: number, durationOfExpiry: number): Boolean {
-    const expiryTime = otpCreatedAt + durationOfExpiry * 1000;
-
-    if (expiryTime - new Date().getTime() <= 0) {
-      return true;
-    }
-
-    return false;
   }
 }

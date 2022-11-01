@@ -12,7 +12,7 @@ import AuthModuleConstants from '../authModuleConstants';
 export class SignupDto {
 
     @IsNotEmpty()
-    // @IsValueFromConfig({Key: 'settings.roles'})
+    @IsValueFromConfig({ key: 'settings.roles' })
     role: number;
 
     @IsEmail()
