@@ -7,6 +7,7 @@ import {
   JobRepositoryContract,
 } from '../repositories';
 import { JobIdDto } from '../dtos';
+import { GenericException } from '@libs/boat';
 
 @Injectable()
 export class AdminJobsService {
@@ -33,18 +34,29 @@ export class AdminJobsService {
     });
   }
 
-  async disableJob(payload: any, user: any) {
+  async updateJobStatus(payload: any, user: any) {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
+
+    let job = await this.repo.firstWhere({
+      uuid: validatedInputs.id,
+    });
 
     let patchedJob = await this.repo.updateWhere(
       {
         uuid: validatedInputs.id,
       },
       {
-        isActive: false,
+        isActive: !job.isActive,
       },
     );
 
-    return patchedJob;
+    if (!patchedJob) {
+      throw new GenericException();
+    }
+
+    return {
+      success: true,
+      message: `Job status has been set to ${!job.isActive}`,
+    };
   }
 }

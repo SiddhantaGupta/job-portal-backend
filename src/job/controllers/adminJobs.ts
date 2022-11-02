@@ -25,6 +25,6 @@ export class AdminJobsController {
 
   @Patch(':id')
   async disableJob(@Req() req: Request) {
-    return await this.adminJobsService.disableJob(req.all(), req.user);
+    return await this.adminJobsService.updateJobStatus(req.all(), req.user);
   }
 }
