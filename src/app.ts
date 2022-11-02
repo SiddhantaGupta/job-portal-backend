@@ -30,7 +30,7 @@ import { JobModule } from './job/module';
     EventModule,
     ConsoleModule,
     AuthModule,
-    JobModule
+    JobModule,
   ],
   controllers: [],
   providers: [],

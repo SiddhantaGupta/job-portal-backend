@@ -1,8 +1,5 @@
 import { UserService } from '@app/user';
-import {
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -21,7 +18,6 @@ import { CacheStore } from '@libs/cache';
 
 @Injectable()
 export class AuthService {
-
   constructor(
     private readonly userService: UserService,
     private config: ConfigService,
@@ -35,10 +31,7 @@ export class AuthService {
     let userPayload = null;
     let resumePayload = null;
     if (payload.role === userRoles.candidate) {
-      validatedInputs = await this.validator.fire(
-        payload,
-        CandidateSignupDto,
-      );
+      validatedInputs = await this.validator.fire(payload, CandidateSignupDto);
 
       userPayload = pick(validatedInputs, [
         'firstName',
@@ -54,9 +47,6 @@ export class AuthService {
         'fieldOfWork',
         'skills',
       ]);
-
-      console.log(resumePayload)
-
     } else {
       validatedInputs = await this.validator.fire(payload, SignupDto);
 
@@ -67,7 +57,7 @@ export class AuthService {
         'role',
         'password',
         'phoneNumber',
-      ]);;
+      ]);
     }
 
     userPayload.password = await bcrypt.hash(userPayload.password, 10);
@@ -83,7 +73,6 @@ export class AuthService {
         userId: user.id,
         ...resumePayload,
       });
-      console.log(resume)
     }
 
     if (!user) {
@@ -126,7 +115,7 @@ export class AuthService {
     const secret = this.config.get('JWT_SECRET');
 
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '120m',
+      expiresIn: '120d',
       secret: secret,
     });
 
@@ -147,17 +136,21 @@ export class AuthService {
 
     const user = await this.userService.repo.query().findOne({
       email: validatedInputs.email,
-    });     
+    });
 
     if (!user) {
       throw new ValidationFailed({
-        'email': "Email does not exist"
-      })
+        email: 'Email does not exist',
+      });
     }
 
     const otp = Math.floor(Math.random() * 10000000);
 
-    await CacheStore().set(`${validatedInputs.email}_password_reset_otp`, `${otp}`, 120);
+    await CacheStore().set(
+      `${validatedInputs.email}_password_reset_otp`,
+      `${otp}`,
+      120,
+    );
 
     return {
       success: true,
@@ -176,29 +169,33 @@ export class AuthService {
       ResetPasswordDto,
     );
 
-    let otpCheck = await CacheStore().has(`${validatedInputs.email}_password_reset_otp`)
+    let otpCheck = await CacheStore().has(
+      `${validatedInputs.email}_password_reset_otp`,
+    );
 
     if (!otpCheck) {
       throw new ValidationFailed({
-        'otp':'Incorrect OTP'
-      })
+        otp: 'Incorrect OTP',
+      });
     }
 
     if (validatedInputs.newPassword !== validatedInputs.confirmNewPassword) {
       throw new ValidationFailed({
-        'newPassword': "New password does not match confirm password",
-        'confirmNewPassword': "Confirm password does not match new password"
-      })
+        newPassword: 'New password does not match confirm password',
+        confirmNewPassword: 'Confirm password does not match new password',
+      });
     }
 
     let newHashedPassword = await bcrypt.hash(validatedInputs.newPassword, 10);
 
-    const userUpdated = this.userService.repo
-      .updateWhere({
+    const userUpdated = this.userService.repo.updateWhere(
+      {
         email: payload.email,
-      }, {
-        password: newHashedPassword
-      })
+      },
+      {
+        password: newHashedPassword,
+      },
+    );
 
     if (userUpdated) {
       return {

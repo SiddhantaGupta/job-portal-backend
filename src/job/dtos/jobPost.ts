@@ -1,4 +1,5 @@
 import { IsValueFromConfig } from '@libs/boat/validator';
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class JobPostDto {
@@ -12,6 +13,7 @@ export class JobPostDto {
 
   @IsNotEmpty()
   @IsString()
+  @Transform(({ value }) => value.toLowerCase())
   location: string;
 
   @IsNotEmpty()
@@ -22,12 +24,4 @@ export class JobPostDto {
   @IsNotEmpty()
   @IsString()
   companyName: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  salaryLowerLimit: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  salaryUpperLimit: number;
 }

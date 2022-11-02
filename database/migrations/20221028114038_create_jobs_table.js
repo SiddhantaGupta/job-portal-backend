@@ -15,12 +15,11 @@ exports.up = async function(knex) {
           table.string('uuid');
           table.string('title');
           table.string('description');
-          table.integer('location');
+          table.string('location');
           table.integer('employment_type');
           table.string('company_name');
-          table.integer('salary_lower_limit');
-          table.integer('salary_upper_limit');
-          table.integer('posted_by')
+          table.integer('posted_by');
+          table.boolean('is_active');
           timestamps(knex, table);
         },
       );

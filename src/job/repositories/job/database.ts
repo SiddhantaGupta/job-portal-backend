@@ -10,4 +10,5 @@ export class JobRepository
 {
   @InjectModel(JobModel)
   model: JobModel;
+  // this.query().withGraphFetched({apllications:true})
 }

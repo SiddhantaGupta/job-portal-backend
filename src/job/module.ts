@@ -12,7 +12,7 @@ import {
   CandidateJobsService,
   RecruiterJobsService,
 } from './providers';
-import { JobRepository } from './repositories';
+import { JobRepository, ApplicationRepository } from './repositories';
 
 @Module({
   imports: [UserModule],
@@ -27,6 +27,10 @@ import { JobRepository } from './repositories';
     RecruiterJobsService,
     BaseValidator,
     { provide: JobModuleConstants.jobRepo, useClass: JobRepository },
+    {
+      provide: JobModuleConstants.applicationRepo,
+      useClass: ApplicationRepository,
+    },
   ],
 })
 export class JobModule {}

@@ -13,7 +13,6 @@ exports.up = async function(knex) {
         function (table) {
           table.bigIncrements('id');
           table.string('uuid');
-          table.string('cover_letter');
           table.integer('user_id');
           table.integer('job_id');
           timestamps(knex, table);

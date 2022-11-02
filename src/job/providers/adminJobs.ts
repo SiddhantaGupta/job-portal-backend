@@ -2,7 +2,11 @@ import { BaseValidator } from '@libs/boat/validator';
 import { ConfigService } from '@nestjs/config';
 import { Inject, Injectable } from '@nestjs/common';
 import { JobModuleConstants } from '../constants';
-import { JobRepositoryContract } from '../repositories';
+import {
+  ApplicationRepositoryContract,
+  JobRepositoryContract,
+} from '../repositories';
+import { JobIdDto } from '../dtos';
 
 @Injectable()
 export class AdminJobsService {
@@ -10,21 +14,37 @@ export class AdminJobsService {
     private validator: BaseValidator,
     private config: ConfigService,
     @Inject(JobModuleConstants.jobRepo) public repo: JobRepositoryContract,
+    @Inject(JobModuleConstants.applicationRepo)
+    public applicationRepo: ApplicationRepositoryContract,
   ) {}
 
-  async Jobs(payload: any) {
-    throw new Error('Method not implemented.');
+  async jobs(payload: any, user: any) {
+    return await this.repo.all();
+  }
+  async applications(payload: any, user: any) {
+    return await this.applicationRepo.all();
   }
 
-  async Job(payload: any) {
-    throw new Error('Method not implemented.');
+  async job(payload: any, user: any) {
+    const validatedInputs = await this.validator.fire(payload, JobIdDto);
+
+    return await this.repo.firstWhere({
+      uuid: validatedInputs.id,
+    });
   }
 
-  async disableJob(payload: any) {
-    throw new Error('Method not implemented.');
-  }
+  async disableJob(payload: any, user: any) {
+    const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
-  async applications(payload: any) {
-    throw new Error('Method not implemented.');
+    let patchedJob = await this.repo.updateWhere(
+      {
+        uuid: validatedInputs.id,
+      },
+      {
+        isActive: false,
+      },
+    );
+
+    return patchedJob;
   }
 }
