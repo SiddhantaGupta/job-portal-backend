@@ -1,11 +1,16 @@
 import { ResumeService, UserService } from '@app/user';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { BaseValidator } from '@libs/boat/validator';
-import { AdminLoginDto } from '../dto';
+import { AdminLoginDto } from '../dtos';
 import { IUserModel } from '@app/user/interfaces';
+import { ValidationFailed } from '@libs/boat';
 
 @Injectable()
 export class AdminAuthService {
@@ -16,12 +21,21 @@ export class AdminAuthService {
     private validator: BaseValidator,
   ) {}
 
-  async login(payload: Record<string, any>): Promise<IUserModel> {
+  async login(payload: AdminLoginDto): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, AdminLoginDto);
 
-    const user = await this.userService.repo.query().findOne({
-      email: validatedInputs.email,
-    });
+    const user = await this.userService.repo.firstWhere(
+      {
+        email: validatedInputs.email,
+      },
+      false,
+    );
+
+    if (!user) {
+      throw new ValidationFailed({
+        email: 'email does not exist',
+      });
+    }
 
     let passwordVerified;
     if (user) {
@@ -32,15 +46,18 @@ export class AdminAuthService {
     }
 
     if (!passwordVerified) {
-      throw new ForbiddenException('Credentials Incorrect');
+      throw new UnauthorizedException('Credentials Incorrect');
     }
 
     const userRoles = this.config.get('settings.roles');
     if (!(user.role === userRoles.admin)) {
-      throw new ForbiddenException('Not an admin');
+      throw new UnauthorizedException('Not an admin');
     }
 
-    return await this.signToken(user.uuid);
+    return {
+      ...user,
+      accessToken: (await this.signToken(user.uuid)).accessToken,
+    };
   }
 
   async signToken(uuid: string): Promise<{ accessToken: string }> {
@@ -48,9 +65,10 @@ export class AdminAuthService {
       uuid: uuid,
     };
     const secret = this.config.get('JWT_SECRET');
+    const expiry = this.config.get('JWT_EXPIRY');
 
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '120m',
+      expiresIn: expiry,
       secret: secret,
     });
 

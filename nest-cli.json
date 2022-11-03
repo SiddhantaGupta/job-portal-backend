@@ -28,6 +28,33 @@
       "compilerOptions": {
         "tsConfigPath": "libs/nest-mailman/tsconfig.lib.json"
       }
+    },
+    "nest-queue-redis": {
+      "type": "library",
+      "root": "libs/nest-queue-redis",
+      "entryFile": "index",
+      "sourceRoot": "libs/nest-queue-redis/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/nest-queue-redis/tsconfig.lib.json"
+      }
+    },
+    "sq-nest-queue": {
+      "type": "library",
+      "root": "libs/sq-nest-queue",
+      "entryFile": "index",
+      "sourceRoot": "libs/sq-nest-queue/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/sq-nest-queue/tsconfig.lib.json"
+      }
+    },
+    "sq-obj": {
+      "type": "library",
+      "root": "libs/sq-obj",
+      "entryFile": "index",
+      "sourceRoot": "libs/sq-obj/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/sq-obj/tsconfig.lib.json"
+      }
     }
   },
   "compilerOptions": {

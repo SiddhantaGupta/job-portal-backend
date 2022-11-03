@@ -16,6 +16,12 @@
     "@libs/cache/(.*)": "<rootDir>/../libs/cache/src/$1",
     "@libs/cache": "<rootDir>/../libs/cache/src",
     "@libs/nest-mailman/(.*)": "<rootDir>/../libs/nest-mailman/src/$1",
-    "@libs/nest-mailman": "<rootDir>/../libs/nest-mailman/src"
+    "@libs/nest-mailman": "<rootDir>/../libs/nest-mailman/src",
+    "@libs/nest-queue-redis/(.*)": "<rootDir>/../libs/nest-queue-redis/src/$1",
+    "@libs/nest-queue-redis": "<rootDir>/../libs/nest-queue-redis/src",
+    "@libs/sq-nest-queue/(.*)": "<rootDir>/../libs/sq-nest-queue/src/$1",
+    "@libs/sq-nest-queue": "<rootDir>/../libs/sq-nest-queue/src",
+    "@libs/sq-obj/(.*)": "<rootDir>/../libs/sq-obj/src/$1",
+    "@libs/sq-obj": "<rootDir>/../libs/sq-obj/src"
   }
 }

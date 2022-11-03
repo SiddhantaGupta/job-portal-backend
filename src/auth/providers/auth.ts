@@ -1,5 +1,9 @@
 import { UserService } from '@app/user';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -10,12 +14,14 @@ import {
   SignupDto,
   ForgotPasswordDto,
   ResetPasswordDto,
-} from '../dto';
+} from '../dtos';
 import { uuid } from 'uuidv4';
 import { pick } from 'lodash';
 import { GenericException, ValidationFailed } from '@libs/boat';
 import { CacheStore } from '@libs/cache';
-import { Mailman, MailMessage } from 'libs/nest-mailman/src';
+import { EmitEvent } from '@squareboat/nest-events';
+import { UserRequestedOtp } from '../events/userRequestedOtp';
+import { IUserModel } from '@app/user/interfaces';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +32,7 @@ export class AuthService {
     private validator: BaseValidator,
   ) {}
 
-  async signup(payload: Record<string, any>): Promise<{ accessToken: string }> {
+  async signup(payload: SignupDto | CandidateSignupDto): Promise<IUserModel> {
     const userRoles = this.config.get('settings.roles');
     let validatedInputs = null;
     let userPayload = null;
@@ -76,7 +82,7 @@ export class AuthService {
     const user = await this.userService.repo.create({
       uuid: uuid(),
       ...userPayload,
-      is_active: true,
+      isActive: true,
     });
 
     if (resumePayload) {
@@ -96,7 +102,7 @@ export class AuthService {
     });
   }
 
-  async login(payload: Record<string, any>): Promise<{ accessToken: string }> {
+  async login(payload: LoginDto): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, LoginDto);
 
     const user = await this.userService.repo.firstWhere({
@@ -104,7 +110,7 @@ export class AuthService {
     });
 
     if (!user.isActive) {
-      throw new ForbiddenException('User has been blocked');
+      throw new UnauthorizedException('User has been blocked');
     }
 
     let passwordVerified;
@@ -116,10 +122,13 @@ export class AuthService {
     }
 
     if (!passwordVerified) {
-      throw new ForbiddenException('Credentials Incorrect');
+      throw new UnauthorizedException('Credentials Incorrect');
     }
 
-    return await this.signToken(user.uuid);
+    return {
+      ...user,
+      accessToken: (await this.signToken(user.uuid)).accessToken,
+    };
   }
 
   async signToken(uuid: string): Promise<{ accessToken: string }> {
@@ -136,7 +145,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(payload: Record<string, any>): Promise<{
+  async forgotPassword(payload: ForgotPasswordDto): Promise<{
     message: string;
   }> {
     const validatedInputs = await this.validator.fire(
@@ -144,9 +153,12 @@ export class AuthService {
       ForgotPasswordDto,
     );
 
-    const user = await this.userService.repo.query().findOne({
-      email: validatedInputs.email,
-    });
+    const user = await this.userService.repo.firstWhere(
+      {
+        email: validatedInputs.email,
+      },
+      false,
+    );
 
     if (!user) {
       throw new ValidationFailed({
@@ -154,27 +166,35 @@ export class AuthService {
       });
     }
 
-    const otp = Math.floor(Math.random() * 10000000);
+    const otpRedisKey = `${validatedInputs.email}_password_reset_otp`;
+    let otp;
 
-    await CacheStore().set(
-      `${validatedInputs.email}_password_reset_otp`,
-      `${otp}`,
-      120,
+    const nodeEnvironment = this.config.get('APP_ENV');
+
+    if (await CacheStore().has(otpRedisKey)) {
+      otp = await CacheStore().get(otpRedisKey);
+    } else {
+      otp =
+        nodeEnvironment === 'local'
+          ? 111111
+          : Math.floor(Math.random() * 10000000);
+      await CacheStore().set(otpRedisKey, `${otp}`, 120);
+    }
+
+    EmitEvent(
+      new UserRequestedOtp({
+        email: validatedInputs.email,
+        subject: 'Password reset OTP',
+        message: `Your password reset OTP is ${otp}`,
+      }),
     );
-
-    const mail = MailMessage.init()
-      .greeting('Hello user')
-      .line(`Your password reset OTP is ${otp}`)
-      .subject('Password Reset OTP');
-
-    Mailman.init().to(user.email).send(mail);
 
     return {
       message: 'Your password reset OTP has been sent on your registered email',
     };
   }
 
-  async resetPassword(payload: Record<string, any>): Promise<void> {
+  async resetPassword(payload: ResetPasswordDto): Promise<{ message: string }> {
     const validatedInputs = await this.validator.fire(
       payload,
       ResetPasswordDto,
@@ -190,16 +210,9 @@ export class AuthService {
       });
     }
 
-    if (validatedInputs.newPassword !== validatedInputs.confirmNewPassword) {
-      throw new ValidationFailed({
-        newPassword: 'New password does not match confirm password',
-        confirmNewPassword: 'Confirm password does not match new password',
-      });
-    }
-
     let newHashedPassword = await bcrypt.hash(validatedInputs.newPassword, 10);
 
-    await this.userService.repo.updateWhere(
+    let passwordUpdated = await this.userService.repo.updateWhere(
       {
         email: payload.email,
       },
@@ -207,5 +220,7 @@ export class AuthService {
         password: newHashedPassword,
       },
     );
+
+    return { message: 'Password updated successfully' };
   }
 }

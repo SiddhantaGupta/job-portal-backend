@@ -15,6 +15,8 @@ export interface SortableSchema {
 }
 
 export interface ObjectionModel {
+  id?: number;
+  $relatedQuery?: GenericFunction;
   $fetchGraph?: GenericFunction;
   $load?(exp: LoadRelSchema): Promise<void>;
 }

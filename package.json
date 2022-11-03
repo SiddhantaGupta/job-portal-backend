@@ -51,6 +51,9 @@
     "@squareboat/nest-console": "^1.0.7",
     "@squareboat/nest-events": "^0.1.0",
     "@squareboat/nest-mailman": "^0.3.0",
+    "@squareboat/nest-queue": "^0.1.0",
+    "@squareboat/nest-queue-redis": "^0.0.4",
+    "@squareboat/nest-queue-strategy": "^0.0.9",
     "@squareboat/nestjs-objection": "^0.1.7",
     "bcrypt": "^5.1.0",
     "cache-manager": "^5.1.1",
@@ -115,7 +118,10 @@
       "@libs/boat/(.*)": "<rootDir>/libs/boat/src/$1",
       "@libs/boat": "<rootDir>/libs/boat/src",
       "^@libs/cache(|/.*)$": "<rootDir>/libs/cache/src/$1",
-      "^@libs/nest-mailman(|/.*)$": "<rootDir>/libs/nest-mailman/src/$1"
+      "^@libs/nest-mailman(|/.*)$": "<rootDir>/libs/nest-mailman/src/$1",
+      "^@libs/nest-queue-redis(|/.*)$": "<rootDir>/libs/nest-queue-redis/src/$1",
+      "^@libs/sq-nest-queue(|/.*)$": "<rootDir>/libs/sq-nest-queue/src/$1",
+      "^@libs/sq-obj(|/.*)$": "<rootDir>/libs/sq-obj/src/$1"
     }
   }
 }

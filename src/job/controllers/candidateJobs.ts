@@ -6,6 +6,12 @@ import {
   ApplicationDetailTransformer,
   JobDetailTransformer,
 } from '@app/transformer';
+import { ApplicationDto, JobIdDto } from '../dtos';
+import {
+  IApplicationSearchModel,
+  IJobSearchModel,
+  IPagination,
+} from '../interfaces';
 
 @Auth('candidate')
 @Controller('candidate/jobs')
@@ -15,47 +21,56 @@ export class CandidateJobsController extends RestController {
   }
 
   @Get('')
-  async jobs(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const jobs = await this.candidateJobsService.jobs(req.all(), req.user);
-    return res.success(
-      await this.collection(jobs, new JobDetailTransformer(), { req }),
+  async getJobs(@Req() req: Request, @Res() res: Response): Promise<Response> {
+    const jobs = await this.candidateJobsService.getJobs(
+      req.all() as IJobSearchModel,
+      req.user,
+    );
+    return res.withMeta(
+      await this.paginate(jobs, new JobDetailTransformer(), { req }),
     );
   }
 
   @Get('applications')
-  async applications(
+  async getApplications(
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<Response> {
-    const applications = await this.candidateJobsService.applications(
-      req.all(),
+    const applications = await this.candidateJobsService.getApplications(
+      req.all() as IApplicationSearchModel,
       req.user,
     );
-    return res.success(
-      await this.collection(applications, new ApplicationDetailTransformer(), {
+    return res.withMeta(
+      await this.paginate(applications, new ApplicationDetailTransformer(), {
         req,
       }),
     );
   }
 
   @Get(':id')
-  async job(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    let job = await this.candidateJobsService.job(req.all(), req.user);
+  async getJobById(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    let job = await this.candidateJobsService.getJobById(
+      req.all() as JobIdDto,
+      req.user,
+    );
     return res.success(
       await this.transform(job, new JobDetailTransformer(), { req }),
     );
   }
 
   @Post(':id/apply')
-  async apply(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const application = await this.candidateJobsService.apply(
-      req.all(),
-      req.user,
-    );
+  async applyToJob(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
     return res.success(
-      await this.transform(application, new ApplicationDetailTransformer(), {
-        req,
-      }),
+      await this.candidateJobsService.applyToJob(
+        req.all() as ApplicationDto,
+        req.user,
+      ),
     );
   }
 }

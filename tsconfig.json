@@ -35,6 +35,24 @@
       ],
       "@libs/nest-mailman/*": [
         "libs/nest-mailman/src/*"
+      ],
+      "@libs/nest-queue-redis": [
+        "libs/nest-queue-redis/src"
+      ],
+      "@libs/nest-queue-redis/*": [
+        "libs/nest-queue-redis/src/*"
+      ],
+      "@libs/sq-nest-queue": [
+        "libs/sq-nest-queue/src"
+      ],
+      "@libs/sq-nest-queue/*": [
+        "libs/sq-nest-queue/src/*"
+      ],
+      "@libs/sq-obj": [
+        "libs/sq-obj/src"
+      ],
+      "@libs/sq-obj/*": [
+        "libs/sq-obj/src/*"
       ]
     }
   },

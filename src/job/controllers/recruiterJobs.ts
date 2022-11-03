@@ -6,6 +6,13 @@ import {
   ApplicationDetailTransformer,
   JobDetailTransformer,
 } from '@app/transformer';
+import {
+  IApplicationSearchModel,
+  IJobModel,
+  IJobSearchModel,
+  IPagination,
+} from '../interfaces';
+import { JobIdDto, JobPostDto } from '../dtos';
 
 @Auth('recruiter')
 @Controller('recruiter/jobs')
@@ -15,40 +22,52 @@ export class RecruiterJobsController extends RestController {
   }
 
   @Get('')
-  async jobs(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const jobs = await this.recruiterJobsService.jobs(req.all(), req.user);
-    return res.success(
-      await this.collection(jobs, new JobDetailTransformer(), { req }),
+  async getJobs(@Req() req: Request, @Res() res: Response): Promise<Response> {
+    const jobs = await this.recruiterJobsService.getJobs(
+      req.all() as IJobSearchModel,
+      req.user,
+    );
+    return res.withMeta(
+      await this.paginate(jobs, new JobDetailTransformer(), { req }),
     );
   }
 
   @Post('')
   async postJob(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const job = await this.recruiterJobsService.postJob(req.all(), req.user);
+    const job = await this.recruiterJobsService.postJob(
+      req.all() as JobPostDto,
+      req.user,
+    );
     return res.success(
       await this.transform(job, new JobDetailTransformer(), { req }),
     );
   }
 
   @Get(':id')
-  async job(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const job = await this.recruiterJobsService.job(req.all(), req.user);
+  async getJobById(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const job = await this.recruiterJobsService.getJobById(
+      req.all() as JobIdDto,
+      req.user,
+    );
     return res.success(
       await this.transform(job, new JobDetailTransformer(), { req }),
     );
   }
 
   @Get(':id/applications')
-  async applications(
+  async getApplicationsForJob(
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<Response> {
-    const applications = await this.recruiterJobsService.applications(
-      req.all(),
+    const applications = await this.recruiterJobsService.getApplicationsForJob(
+      req.all() as IApplicationSearchModel,
       req.user,
     );
-    return res.success(
-      await this.collection(applications, new ApplicationDetailTransformer(), {
+    return res.withMeta(
+      await this.paginate(applications, new ApplicationDetailTransformer(), {
         req,
       }),
     );

@@ -5,8 +5,9 @@ import { ResumeRepositoryContract } from '../repositories/resume/contract';
 import { BaseValidator } from '@libs/boat/validator';
 import { UserIdDto } from '../dtos/userId';
 import { GenericException } from '@libs/boat';
-import { IUserModel } from '../interfaces';
-import { PaginationDto } from '@app/job/dtos';
+import { IUserModel, IUserSearchModel } from '../interfaces';
+import { IPagination } from '@app/job/interfaces';
+import { Pagination } from '@libs/sq-obj';
 
 @Injectable()
 export class AdminUserService {
@@ -17,30 +18,20 @@ export class AdminUserService {
     public resumeRepo: ResumeRepositoryContract,
   ) {}
 
-  async users(payload: Record<string, any>): Promise<IUserModel[]> {
-    if (payload && Object.keys(payload).length === 0) {
-      return await this.repo.all();
-    }
-
-    const validatedInputs = await this.validator.fire(payload, PaginationDto);
-
-    const usersPaginatedSearch = await this.repo
-      .query()
-      .page(validatedInputs.page, validatedInputs.items);
-
-    return usersPaginatedSearch.results;
+  async getUsers(payload: IUserSearchModel): Promise<Pagination<IUserModel>> {
+    return this.repo.search(payload);
   }
 
-  async user(payload: Record<string, any>): Promise<IUserModel> {
+  async getUserById(payload: UserIdDto): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, UserIdDto);
 
-    return await this.repo.firstWhere({
+    return this.repo.firstWhere({
       uuid: validatedInputs.id,
     });
   }
 
   async updateUserStatus(
-    payload: Record<string, any>,
+    payload: UserIdDto,
   ): Promise<IUserModel | IUserModel[]> {
     const validatedInputs = await this.validator.fire(payload, UserIdDto);
 

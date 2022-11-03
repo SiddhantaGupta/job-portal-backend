@@ -7,9 +7,8 @@ export class CandidateGetJobFilterDto {
 
   title: string;
 
-  @Transform(({ value }) => Number(value))
-  items: number;
-
-  @Transform(({ value }) => Number(value))
   page: number;
+  perPage: number;
+  isActive: boolean;
+  userId: number;
 }
