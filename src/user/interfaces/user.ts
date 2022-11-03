@@ -11,5 +11,4 @@ export interface IUserModel extends ObjectionModel {
   phoneNumber?: string;
   isActive?: boolean;
   accessToken?: string;
-  otp?: string;
 }

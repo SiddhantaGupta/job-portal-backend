@@ -30,10 +30,7 @@ export class AuthController extends RestController {
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<Response> {
-    let otp = await this.authService.forgotPassword(req.all());
-    return res.success(
-      await this.transform(otp, new UserDetailTransformer(), { req }),
-    );
+    return res.success(await this.authService.forgotPassword(req.all()));
   }
 
   @Post('reset-password')

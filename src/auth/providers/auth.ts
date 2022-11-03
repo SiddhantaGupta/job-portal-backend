@@ -3,7 +3,7 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { BaseValidator, validate } from '@libs/boat/validator';
+import { BaseValidator } from '@libs/boat/validator';
 import {
   LoginDto,
   CandidateSignupDto,
@@ -12,10 +12,10 @@ import {
   ResetPasswordDto,
 } from '../dto';
 import { uuid } from 'uuidv4';
-import { indexOf, pick } from 'lodash';
+import { pick } from 'lodash';
 import { GenericException, ValidationFailed } from '@libs/boat';
 import { CacheStore } from '@libs/cache';
-import { IUserModel } from '@app/user/interfaces';
+import { Mailman, MailMessage } from 'libs/nest-mailman/src';
 
 @Injectable()
 export class AuthService {
@@ -137,9 +137,7 @@ export class AuthService {
   }
 
   async forgotPassword(payload: Record<string, any>): Promise<{
-    success: boolean;
-    message?: string;
-    otp?: number;
+    message: string;
   }> {
     const validatedInputs = await this.validator.fire(
       payload,
@@ -164,12 +162,16 @@ export class AuthService {
       120,
     );
 
-    return {
-      success: true,
-      otp,
-    };
+    const mail = MailMessage.init()
+      .greeting('Hello user')
+      .line(`Your password reset OTP is ${otp}`)
+      .subject('Password Reset OTP');
 
-    // TODO: send reset password otp in to user.email
+    Mailman.init().to(user.email).send(mail);
+
+    return {
+      message: 'Your password reset OTP has been sent on your registered email',
+    };
   }
 
   async resetPassword(payload: Record<string, any>): Promise<void> {
