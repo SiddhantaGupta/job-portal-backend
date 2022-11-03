@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { BaseValidator } from '@libs/boat/validator';
 import { AdminLoginDto } from '../dto';
 import { IUserModel } from '@app/user/interfaces';
+import { ValidationFailed } from '@libs/boat';
 
 @Injectable()
 export class AdminAuthService {
@@ -16,14 +17,21 @@ export class AdminAuthService {
     private validator: BaseValidator,
   ) {}
 
-  // INSERT INTO users (email, password, role) VALUES ('admin@example.com', '$2a$12$hYZ83STMk38Rc3hU1ry6HeOGlwa3K64a5WswTFG7zjJ2lGd0kQmfa', 1);
-
-  async login(payload: Record<string, any>): Promise<IUserModel> {
+  async login(payload: AdminLoginDto): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, AdminLoginDto);
 
-    const user = await this.userService.repo.query().findOne({
-      email: validatedInputs.email,
-    });
+    const user = await this.userService.repo.firstWhere(
+      {
+        email: validatedInputs.email,
+      },
+      false,
+    );
+
+    if (!user) {
+      throw new ValidationFailed({
+        email: 'email does not exist',
+      });
+    }
 
     let passwordVerified;
     if (user) {

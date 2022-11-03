@@ -6,9 +6,9 @@ import {
   ApplicationRepositoryContract,
   JobRepositoryContract,
 } from '../repositories';
-import { ApplicationIdDto, JobIdDto, PaginationDto } from '../dtos';
+import { ApplicationIdDto, JobIdDto } from '../dtos';
 import { GenericException } from '@libs/boat';
-import { IApplicationModel, IJobModel } from '../interfaces';
+import { IApplicationModel, IJobModel, IPagination } from '../interfaces';
 
 @Injectable()
 export class AdminJobsService {
@@ -20,36 +20,32 @@ export class AdminJobsService {
     public applicationRepo: ApplicationRepositoryContract,
   ) {}
 
-  async jobs(payload: Record<string, any>): Promise<IJobModel[]> {
+  async getJobs(payload: IPagination): Promise<IJobModel[]> {
     if (payload && Object.keys(payload).length === 0) {
       return await this.repo.all();
     }
 
-    const validatedInputs = await this.validator.fire(payload, PaginationDto);
-
     let jobPaginatedSearch = await this.repo
       .query()
-      .page(validatedInputs.page, validatedInputs.items);
+      .page(payload.page, payload.perPage);
 
     return jobPaginatedSearch.results;
   }
-  async applications(
-    payload: Record<string, any>,
-  ): Promise<IApplicationModel[]> {
+  async getApplications(payload: IPagination): Promise<IApplicationModel[]> {
     if (payload && Object.keys(payload).length === 0) {
       return await this.applicationRepo.all();
     }
 
-    const validatedInputs = await this.validator.fire(payload, PaginationDto);
-
     let applicationPaginatedSearch = await this.applicationRepo
       .query()
-      .page(validatedInputs.page, validatedInputs.items);
+      .page(payload.page, payload.perPage);
 
     return applicationPaginatedSearch.results;
   }
 
-  async application(payload: Record<string, any>): Promise<IApplicationModel> {
+  async getApplicationById(
+    payload: ApplicationIdDto,
+  ): Promise<IApplicationModel> {
     const validatedInputs = await this.validator.fire(
       payload,
       ApplicationIdDto,
@@ -60,7 +56,7 @@ export class AdminJobsService {
     });
   }
 
-  async job(payload: Record<string, any>): Promise<IJobModel> {
+  async getJobById(payload: JobIdDto): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     return await this.repo.firstWhere({
@@ -68,9 +64,7 @@ export class AdminJobsService {
     });
   }
 
-  async updateJobStatus(
-    payload: Record<string, any>,
-  ): Promise<IJobModel | IJobModel[]> {
+  async updateJobStatus(payload: JobIdDto): Promise<IJobModel | IJobModel[]> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     let job = await this.repo.firstWhere({

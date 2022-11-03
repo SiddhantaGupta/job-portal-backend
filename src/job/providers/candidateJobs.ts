@@ -11,10 +11,10 @@ import {
   ApplicationRepositoryContract,
   JobRepositoryContract,
 } from '../repositories';
-import { CandidateGetJobFilterDto, JobIdDto, PaginationDto } from '../dtos';
+import { CandidateGetJobFilterDto, JobIdDto } from '../dtos';
 import { uuid } from 'uuidv4';
 import { ApplicationDto } from '../dtos/application';
-import { IApplicationModel, IJobModel } from '../interfaces';
+import { IApplicationModel, IJobModel, IPagination } from '../interfaces';
 import { IUserModel } from '@app/user/interfaces';
 import { pick } from 'lodash';
 
@@ -28,8 +28,8 @@ export class CandidateJobsService {
     public applicationRepo: ApplicationRepositoryContract,
   ) {}
 
-  async jobs(
-    payload: Record<string, any>,
+  async getJobs(
+    payload: CandidateGetJobFilterDto,
     user: IUserModel,
   ): Promise<IJobModel[]> {
     if (payload && Object.keys(payload).length === 0) {
@@ -40,47 +40,43 @@ export class CandidateJobsService {
       payload,
       CandidateGetJobFilterDto,
     );
-    const filters = pick(validatedInputs, ['title', 'location']);
 
-    if (validatedInputs.page >= 0 && validatedInputs.items >= 0) {
+    if (payload.page >= 0 && payload.perPage >= 0) {
       let jobsPaginatedSearch = await this.repo
         .query()
         .where({
-          ...filters,
+          ...validatedInputs,
           isActive: true,
         })
-        .page(validatedInputs.page, validatedInputs.items);
+        .page(payload.page, payload.perPage);
 
       return jobsPaginatedSearch.results;
     }
 
     return await this.repo.getWhere({
-      ...filters,
+      ...validatedInputs,
       isActive: true,
     });
   }
 
-  async applications(
-    payload: Record<string, any>,
+  async getApplications(
+    payload: IPagination,
     user: IUserModel,
   ): Promise<IApplicationModel[]> {
     if (payload && Object.keys(payload).length === 0) {
-      return await this.applicationRepo.all();
+      return await this.applicationRepo.getWhere({
+        userId: user.id,
+      });
     }
-
-    const validatedInputs = await this.validator.fire(payload, PaginationDto);
 
     let applicationPaginatedSearch = await this.applicationRepo
       .query()
-      .page(validatedInputs.page, validatedInputs.items);
+      .page(payload.page, payload.perPage);
 
     return applicationPaginatedSearch.results;
   }
 
-  async job(
-    payload: Record<string, any>,
-    user: IUserModel,
-  ): Promise<IJobModel> {
+  async getJobById(payload: JobIdDto, user: IUserModel): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     let job = await this.repo.firstWhere({
@@ -94,8 +90,8 @@ export class CandidateJobsService {
     return job;
   }
 
-  async apply(
-    payload: Record<string, any>,
+  async applyToJob(
+    payload: ApplicationDto,
     user: IUserModel,
   ): Promise<IApplicationModel> {
     const validatedInputs = await this.validator.fire(payload, ApplicationDto);

@@ -26,7 +26,9 @@ export class AuthService {
     private validator: BaseValidator,
   ) {}
 
-  async signup(payload: Record<string, any>): Promise<{ accessToken: string }> {
+  async signup(
+    payload: SignupDto | CandidateSignupDto,
+  ): Promise<{ accessToken: string }> {
     const userRoles = this.config.get('settings.roles');
     let validatedInputs = null;
     let userPayload = null;
@@ -76,7 +78,7 @@ export class AuthService {
     const user = await this.userService.repo.create({
       uuid: uuid(),
       ...userPayload,
-      is_active: true,
+      isActive: true,
     });
 
     if (resumePayload) {
@@ -96,7 +98,7 @@ export class AuthService {
     });
   }
 
-  async login(payload: Record<string, any>): Promise<{ accessToken: string }> {
+  async login(payload: LoginDto): Promise<{ accessToken: string }> {
     const validatedInputs = await this.validator.fire(payload, LoginDto);
 
     const user = await this.userService.repo.firstWhere({
@@ -136,7 +138,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(payload: Record<string, any>): Promise<{
+  async forgotPassword(payload: ForgotPasswordDto): Promise<{
     message: string;
   }> {
     const validatedInputs = await this.validator.fire(
@@ -174,7 +176,7 @@ export class AuthService {
     };
   }
 
-  async resetPassword(payload: Record<string, any>): Promise<void> {
+  async resetPassword(payload: ResetPasswordDto): Promise<{ message: string }> {
     const validatedInputs = await this.validator.fire(
       payload,
       ResetPasswordDto,
@@ -190,16 +192,9 @@ export class AuthService {
       });
     }
 
-    if (validatedInputs.newPassword !== validatedInputs.confirmNewPassword) {
-      throw new ValidationFailed({
-        newPassword: 'New password does not match confirm password',
-        confirmNewPassword: 'Confirm password does not match new password',
-      });
-    }
-
     let newHashedPassword = await bcrypt.hash(validatedInputs.newPassword, 10);
 
-    await this.userService.repo.updateWhere(
+    let passwordUpdated = await this.userService.repo.updateWhere(
       {
         email: payload.email,
       },
@@ -207,5 +202,7 @@ export class AuthService {
         password: newHashedPassword,
       },
     );
+
+    return { message: 'Password updated successfully' };
   }
 }

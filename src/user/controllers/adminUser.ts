@@ -3,6 +3,8 @@ import { AdminUserService } from '../services/adminUser';
 import { Request, Response, RestController } from '@libs/boat';
 import { Auth } from '@app/auth/decorators/auth';
 import { UserDetailTransformer } from '@app/transformer';
+import { IPagination } from '@app/job/interfaces';
+import { UserIdDto } from '../dtos/userId';
 
 @Auth('admin')
 @Controller('admin/users')
@@ -12,27 +14,34 @@ export class AdminUserController extends RestController {
   }
 
   @Get('')
-  async users(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const users = await this.adminUserService.users(req.all());
+  async getUsers(@Req() req: Request, @Res() res: Response): Promise<Response> {
+    const users = await this.adminUserService.getUsers(
+      req.all() as IPagination,
+    );
     return res.success(
       await this.collection(users, new UserDetailTransformer(), { req }),
     );
   }
 
   @Get(':id')
-  async user(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    let user = await this.adminUserService.user(req.all());
+  async getUserById(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    let user = await this.adminUserService.getUserById(req.all() as UserIdDto);
     return res.success(
       await this.transform(user, new UserDetailTransformer(), { req }),
     );
   }
 
   @Patch(':id')
-  async disableUser(
+  async updateUserStatus(
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<Response> {
-    let updatedUser = await this.adminUserService.updateUserStatus(req.all());
+    let updatedUser = await this.adminUserService.updateUserStatus(
+      req.all() as UserIdDto,
+    );
     return res.success(
       await this.transform(updatedUser, new UserDetailTransformer(), { req }),
     );

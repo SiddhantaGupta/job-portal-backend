@@ -6,6 +6,8 @@ import {
   ApplicationDetailTransformer,
   JobDetailTransformer,
 } from '@app/transformer';
+import { ApplicationDto, CandidateGetJobFilterDto, JobIdDto } from '../dtos';
+import { IPagination } from '../interfaces';
 
 @Auth('candidate')
 @Controller('candidate/jobs')
@@ -15,20 +17,23 @@ export class CandidateJobsController extends RestController {
   }
 
   @Get('')
-  async jobs(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const jobs = await this.candidateJobsService.jobs(req.all(), req.user);
+  async getJobs(@Req() req: Request, @Res() res: Response): Promise<Response> {
+    const jobs = await this.candidateJobsService.getJobs(
+      req.all() as CandidateGetJobFilterDto,
+      req.user,
+    );
     return res.success(
       await this.collection(jobs, new JobDetailTransformer(), { req }),
     );
   }
 
   @Get('applications')
-  async applications(
+  async getApplications(
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<Response> {
-    const applications = await this.candidateJobsService.applications(
-      req.all(),
+    const applications = await this.candidateJobsService.getApplications(
+      req.all() as IPagination,
       req.user,
     );
     return res.success(
@@ -39,17 +44,26 @@ export class CandidateJobsController extends RestController {
   }
 
   @Get(':id')
-  async job(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    let job = await this.candidateJobsService.job(req.all(), req.user);
+  async getJobById(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    let job = await this.candidateJobsService.getJobById(
+      req.all() as JobIdDto,
+      req.user,
+    );
     return res.success(
       await this.transform(job, new JobDetailTransformer(), { req }),
     );
   }
 
   @Post(':id/apply')
-  async apply(@Req() req: Request, @Res() res: Response): Promise<Response> {
-    const application = await this.candidateJobsService.apply(
-      req.all(),
+  async applyToJob(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const application = await this.candidateJobsService.applyToJob(
+      req.all() as ApplicationDto,
       req.user,
     );
     return res.success(
