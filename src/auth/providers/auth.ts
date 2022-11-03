@@ -26,7 +26,7 @@ export class AuthService {
     private validator: BaseValidator,
   ) {}
 
-  async signup(payload: any): Promise<{ accessToken: string }> {
+  async signup(payload: Record<string, any>): Promise<{ accessToken: string }> {
     const userRoles = this.config.get('settings.roles');
     let validatedInputs = null;
     let userPayload = null;
@@ -96,7 +96,7 @@ export class AuthService {
     });
   }
 
-  async login(payload: any): Promise<{ accessToken: string }> {
+  async login(payload: Record<string, any>): Promise<{ accessToken: string }> {
     const validatedInputs = await this.validator.fire(payload, LoginDto);
 
     const user = await this.userService.repo.firstWhere({
@@ -136,7 +136,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(payload: any): Promise<{
+  async forgotPassword(payload: Record<string, any>): Promise<{
     success: boolean;
     message?: string;
     otp?: number;
@@ -172,7 +172,7 @@ export class AuthService {
     // TODO: send reset password otp in to user.email
   }
 
-  async resetPassword(payload: any): Promise<void> {
+  async resetPassword(payload: Record<string, any>): Promise<void> {
     const validatedInputs = await this.validator.fire(
       payload,
       ResetPasswordDto,

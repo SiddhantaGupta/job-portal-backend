@@ -14,6 +14,8 @@
     "@libs/boat/(.*)": "<rootDir>/../libs/boat/src/$1",
     "@libs/boat": "<rootDir>/../libs/boat/src",
     "@libs/cache/(.*)": "<rootDir>/../libs/cache/src/$1",
-    "@libs/cache": "<rootDir>/../libs/cache/src"
+    "@libs/cache": "<rootDir>/../libs/cache/src",
+    "@libs/nest-mailman/(.*)": "<rootDir>/../libs/nest-mailman/src/$1",
+    "@libs/nest-mailman": "<rootDir>/../libs/nest-mailman/src"
   }
 }

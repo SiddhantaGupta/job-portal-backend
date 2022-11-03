@@ -19,6 +19,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/cache/tsconfig.lib.json"
       }
+    },
+    "nest-mailman": {
+      "type": "library",
+      "root": "libs/nest-mailman",
+      "entryFile": "index",
+      "sourceRoot": "libs/nest-mailman/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/nest-mailman/tsconfig.lib.json"
+      }
     }
   },
   "compilerOptions": {

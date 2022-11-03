@@ -18,7 +18,7 @@ export class AdminAuthService {
 
   // INSERT INTO users (email, password, role) VALUES ('admin@example.com', '$2a$12$hYZ83STMk38Rc3hU1ry6HeOGlwa3K64a5WswTFG7zjJ2lGd0kQmfa', 1);
 
-  async login(payload: any): Promise<IUserModel> {
+  async login(payload: Record<string, any>): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, AdminLoginDto);
 
     const user = await this.userService.repo.query().findOne({

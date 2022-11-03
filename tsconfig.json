@@ -29,6 +29,12 @@
       ],
       "@libs/cache/*": [
         "libs/cache/src/*"
+      ],
+      "@libs/nest-mailman": [
+        "libs/nest-mailman/src"
+      ],
+      "@libs/nest-mailman/*": [
+        "libs/nest-mailman/src/*"
       ]
     }
   },

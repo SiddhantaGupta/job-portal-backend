@@ -47,8 +47,10 @@
     "@nestjs/jwt": "^9.0.0",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/testing": "^9.1.6",
     "@squareboat/nest-console": "^1.0.7",
     "@squareboat/nest-events": "^0.1.0",
+    "@squareboat/nest-mailman": "^0.3.0",
     "@squareboat/nestjs-objection": "^0.1.7",
     "bcrypt": "^5.1.0",
     "cache-manager": "^5.1.1",
@@ -58,6 +60,7 @@
     "helmet": "^5.1.0",
     "ioredis": "^4.28.2",
     "moment": "^2.29.1",
+    "nodemailer": "^6.8.0",
     "objection": "^3.0.1",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
@@ -111,7 +114,8 @@
     "moduleNameMapper": {
       "@libs/boat/(.*)": "<rootDir>/libs/boat/src/$1",
       "@libs/boat": "<rootDir>/libs/boat/src",
-      "^@libs/cache(|/.*)$": "<rootDir>/libs/cache/src/$1"
+      "^@libs/cache(|/.*)$": "<rootDir>/libs/cache/src/$1",
+      "^@libs/nest-mailman(|/.*)$": "<rootDir>/libs/nest-mailman/src/$1"
     }
   }
 }
