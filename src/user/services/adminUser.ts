@@ -42,6 +42,7 @@ export class AdminUserService {
       {
         isActive: !fetchedUser.isActive,
       },
+      true,
     );
 
     if (!updatedUser) {

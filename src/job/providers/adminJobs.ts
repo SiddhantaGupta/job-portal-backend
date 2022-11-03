@@ -8,6 +8,7 @@ import {
 } from '../repositories';
 import { JobIdDto } from '../dtos';
 import { GenericException } from '@libs/boat';
+import { IApplicationModel, IJobModel } from '../interfaces';
 
 @Injectable()
 export class AdminJobsService {
@@ -19,14 +20,22 @@ export class AdminJobsService {
     public applicationRepo: ApplicationRepositoryContract,
   ) {}
 
-  async jobs(payload: any, user: any) {
+  async jobs(payload: any, user: any): Promise<IJobModel[]> {
     return await this.repo.all();
   }
-  async applications(payload: any, user: any) {
+  async applications(payload: any, user: any): Promise<IApplicationModel[]> {
     return await this.applicationRepo.all();
   }
 
-  async job(payload: any, user: any) {
+  async application(payload: any, user: any): Promise<IApplicationModel> {
+    const validatedInputs = await this.validator.fire(payload, JobIdDto);
+
+    return await this.applicationRepo.firstWhere({
+      uuid: validatedInputs.id,
+    });
+  }
+
+  async job(payload: any, user: any): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     return await this.repo.firstWhere({
@@ -34,7 +43,10 @@ export class AdminJobsService {
     });
   }
 
-  async updateJobStatus(payload: any, user: any) {
+  async updateJobStatus(
+    payload: any,
+    user: any,
+  ): Promise<IJobModel | IJobModel[]> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     let job = await this.repo.firstWhere({
@@ -48,6 +60,7 @@ export class AdminJobsService {
       {
         isActive: !job.isActive,
       },
+      true,
     );
 
     if (!patchedJob) {

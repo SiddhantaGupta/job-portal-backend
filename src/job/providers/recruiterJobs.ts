@@ -8,6 +8,7 @@ import {
 } from '../repositories';
 import { GetOneJobDto, JobPostDto, JobIdDto } from '../dtos';
 import { uuid } from 'uuidv4';
+import { IApplicationModel, IJobModel } from '../interfaces';
 
 @Injectable()
 export class RecruiterJobsService {
@@ -19,20 +20,14 @@ export class RecruiterJobsService {
     public applicationRepo: ApplicationRepositoryContract,
   ) {}
 
-  async jobs(payload: any, user: any) {
+  async jobs(payload: any, user: any): Promise<IJobModel[]> {
     return await this.repo.getWhere({
       postedBy: user.id,
       isActive: true,
     });
   }
 
-  async postJob(
-    payload: any,
-    user: any,
-  ): Promise<{
-    success: boolean;
-    message: string;
-  }> {
+  async postJob(payload: any, user: any): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, JobPostDto);
 
     const post = await this.repo.create({
@@ -42,13 +37,10 @@ export class RecruiterJobsService {
       ...validatedInputs,
     });
 
-    return {
-      success: true,
-      message: 'Job posted successfully!',
-    };
+    return post;
   }
 
-  async job(payload: any, user: any) {
+  async job(payload: any, user: any): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, GetOneJobDto);
 
     return await this.repo.firstWhere({
@@ -56,7 +48,7 @@ export class RecruiterJobsService {
     });
   }
 
-  async applications(payload: any, user: any) {
+  async applications(payload: any, user: any): Promise<IApplicationModel[]> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     const job = await this.repo.firstWhere({
