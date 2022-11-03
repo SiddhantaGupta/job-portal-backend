@@ -1,4 +1,5 @@
-import { ResumeModel } from '@app/user/models';
+import { IResumeModel } from '@app/user/interfaces';
 import { RepositoryContract } from '@squareboat/nestjs-objection';
 
-export interface ResumeRepositoryContract extends RepositoryContract<ResumeModel> {}
+export interface ResumeRepositoryContract
+  extends RepositoryContract<IResumeModel> {}

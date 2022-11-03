@@ -1,5 +1,4 @@
 import { ObjectionModel } from '@libs/boat';
-import { BaseModel } from '@squareboat/nestjs-objection';
 
 export interface IUserModel extends ObjectionModel {
   id?: number;
@@ -11,4 +10,6 @@ export interface IUserModel extends ObjectionModel {
   lastName?: string;
   phoneNumber?: string;
   isActive?: boolean;
+  accessToken?: string;
+  otp?: string;
 }

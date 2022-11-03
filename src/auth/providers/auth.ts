@@ -13,8 +13,9 @@ import {
 } from '../dto';
 import { uuid } from 'uuidv4';
 import { indexOf, pick } from 'lodash';
-import { ValidationFailed } from '@libs/boat';
+import { GenericException, ValidationFailed } from '@libs/boat';
 import { CacheStore } from '@libs/cache';
+import { IUserModel } from '@app/user/interfaces';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     private validator: BaseValidator,
   ) {}
 
-  async signup(payload: any): Promise<any> {
+  async signup(payload: any): Promise<{ accessToken: string }> {
     const userRoles = this.config.get('settings.roles');
     let validatedInputs = null;
     let userPayload = null;
@@ -76,10 +77,7 @@ export class AuthService {
     }
 
     if (!user) {
-      return {
-        success: false,
-        message: 'Signup failed',
-      };
+      throw new GenericException();
     }
 
     return await this.login({
@@ -160,10 +158,7 @@ export class AuthService {
     // TODO: send reset password otp in to user.email
   }
 
-  async resetPassword(payload: any): Promise<{
-    success: boolean;
-    message: string;
-  }> {
+  async resetPassword(payload: any): Promise<void> {
     const validatedInputs = await this.validator.fire(
       payload,
       ResetPasswordDto,
@@ -188,7 +183,7 @@ export class AuthService {
 
     let newHashedPassword = await bcrypt.hash(validatedInputs.newPassword, 10);
 
-    const userUpdated = this.userService.repo.updateWhere(
+    await this.userService.repo.updateWhere(
       {
         email: payload.email,
       },
@@ -196,17 +191,5 @@ export class AuthService {
         password: newHashedPassword,
       },
     );
-
-    if (userUpdated) {
-      return {
-        success: true,
-        message: 'Password has been updated',
-      };
-    } else {
-      return {
-        success: false,
-        message: 'Something went wrong. Please try again later.',
-      };
-    }
   }
 }

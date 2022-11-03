@@ -4,14 +4,16 @@ export class UserDetailTransformer extends Transformer {
   availableIncludes = ['extra', 'address', 'pin'];
   defaultIncludes = ['pin'];
 
-  async transform(user: Record<string, any>): Promise<Record<string, any>> {
+  async transform(model: Record<string, any>): Promise<Record<string, any>> {
     return {
-      id: user.uuid,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
+      id: model.uuid,
+      firstName: model.firstName,
+      lastName: model.lastName,
+      role: model.role,
+      email: model.email,
+      phoneNumber: model.phoneNumber,
+      accessToken: model.accessToken,
+      otp: model.otp,
     };
   }
 

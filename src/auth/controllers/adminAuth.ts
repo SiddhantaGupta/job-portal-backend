@@ -1,16 +1,20 @@
-import { Request } from "@libs/boat";
-import { Controller, Get, Post, Req } from "@nestjs/common";
-import { AdminAuthService } from "../providers/adminAuth";
+import { UserDetailTransformer } from '@app/transformer';
+import { IUserModel } from '@app/user/interfaces';
+import { Request, Response, RestController } from '@libs/boat';
+import { Controller, Post, Req, Res } from '@nestjs/common';
+import { AdminAuthService } from '../providers/adminAuth';
 
 @Controller('admin/auth')
-export class AdminAuthController {
+export class AdminAuthController extends RestController {
+  constructor(private adminAuthService: AdminAuthService) {
+    super();
+  }
 
-    constructor(
-        private adminAuthService: AdminAuthService
-    ) {}
-
-    @Post('login')
-    async login(@Req() req: Request) {
-        return await this.adminAuthService.login(req.all());
-    }
+  @Post('login')
+  async login(@Req() req: Request, @Res() res: Response): Promise<IUserModel> {
+    let authToken = await this.adminAuthService.login(req.all());
+    return res.success(
+      await this.transform(authToken, new UserDetailTransformer(), { req }),
+    );
+  }
 }

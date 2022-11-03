@@ -1,5 +1,6 @@
-import { BaseModel } from '@squareboat/nestjs-objection';
+import { ObjectionModel } from '@libs/boat';
 
-export interface IJobModel extends BaseModel {
+export interface IJobModel extends ObjectionModel {
+  id?: number;
   isActive: boolean;
 }
