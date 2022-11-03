@@ -41,7 +41,7 @@ export class AdminJobsService {
       uuid: validatedInputs.id,
     });
 
-    let patchedJob = await this.repo.updateWhere(
+    let patchedJob = await this.repo.updateAndReturn(
       {
         uuid: validatedInputs.id,
       },
@@ -54,9 +54,6 @@ export class AdminJobsService {
       throw new GenericException();
     }
 
-    return {
-      success: true,
-      message: `Job status has been set to ${!job.isActive}`,
-    };
+    return patchedJob;
   }
 }

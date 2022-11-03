@@ -61,6 +61,16 @@ export class AuthService {
       ]);
     }
 
+    const userExists = await this.userService.repo.exists({
+      email: userPayload.email,
+    });
+
+    if (userExists) {
+      throw new ValidationFailed({
+        email: 'user already exists',
+      });
+    }
+
     userPayload.password = await bcrypt.hash(userPayload.password, 10);
 
     const user = await this.userService.repo.create({
@@ -92,6 +102,10 @@ export class AuthService {
     const user = await this.userService.repo.firstWhere({
       email: validatedInputs.email,
     });
+
+    if (!user.isActive) {
+      throw new ForbiddenException('User has been blocked');
+    }
 
     let passwordVerified;
     if (user) {

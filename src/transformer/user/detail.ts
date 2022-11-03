@@ -12,6 +12,7 @@ export class UserDetailTransformer extends Transformer {
       role: model.role,
       email: model.email,
       phoneNumber: model.phoneNumber,
+      isActive: model.isActive,
       accessToken: model.accessToken,
       otp: model.otp,
     };

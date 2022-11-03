@@ -1,6 +1,6 @@
 import { BaseValidator } from '@libs/boat/validator';
 import { ConfigService } from '@nestjs/config';
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { JobModuleConstants } from '../constants';
 import {
   ApplicationRepositoryContract,
@@ -32,6 +32,7 @@ export class CandidateJobsService {
 
     return await this.repo.getWhere({
       ...validatedInputs,
+      isActive: true,
     });
   }
 
@@ -44,9 +45,15 @@ export class CandidateJobsService {
   async job(payload: any, user: any) {
     const validatedInputs = await this.validator.fire(payload, GetOneJobDto);
 
-    return await this.repo.firstWhere({
+    let job = await this.repo.firstWhere({
       uuid: validatedInputs.id,
     });
+
+    if (!job.isActive) {
+      throw new ForbiddenException('Job has been disabled');
+    }
+
+    return job;
   }
 
   async apply(payload: any, user: any) {

@@ -22,6 +22,7 @@ export class RecruiterJobsService {
   async jobs(payload: any, user: any) {
     return await this.repo.getWhere({
       postedBy: user.id,
+      isActive: true,
     });
   }
 
