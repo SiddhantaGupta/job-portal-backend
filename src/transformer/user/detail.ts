@@ -9,6 +9,9 @@ export class UserDetailTransformer extends Transformer {
       id: user.uuid,
       firstName: user.firstName,
       lastName: user.lastName,
+      role: user.role,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
     };
   }
 

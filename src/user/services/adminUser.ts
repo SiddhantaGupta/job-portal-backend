@@ -5,6 +5,7 @@ import { ResumeRepositoryContract } from '../repositories/resume/contract';
 import { BaseValidator } from '@libs/boat/validator';
 import { UserIdDto } from '../dtos/userId';
 import { GenericException } from '@libs/boat';
+import { IUserModel } from '../interfaces';
 
 @Injectable()
 export class AdminUserService {
@@ -15,11 +16,11 @@ export class AdminUserService {
     public resumeRepo: ResumeRepositoryContract,
   ) {}
 
-  async users(payload: any, user: any) {
+  async users(payload: any): Promise<IUserModel[]> {
     return await this.repo.all();
   }
 
-  async user(payload: any, user: any) {
+  async user(payload: any): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, UserIdDto);
 
     return await this.repo.firstWhere({
@@ -27,14 +28,14 @@ export class AdminUserService {
     });
   }
 
-  async updateUserStatus(payload: any, user: any) {
+  async updateUserStatus(payload: any): Promise<IUserModel | IUserModel[]> {
     const validatedInputs = await this.validator.fire(payload, UserIdDto);
 
     let fetchedUser = await this.repo.firstWhere({
       uuid: validatedInputs.id,
     });
 
-    let userUpdated = await this.repo.updateWhere(
+    let updatedUser = await this.repo.updateAndReturn(
       {
         uuid: validatedInputs.id,
       },
@@ -43,13 +44,10 @@ export class AdminUserService {
       },
     );
 
-    if (!userUpdated) {
+    if (!updatedUser) {
       throw new GenericException();
     }
 
-    return {
-      success: true,
-      message: `User status has been set to ${!fetchedUser.isActive}`,
-    };
+    return updatedUser;
   }
 }
