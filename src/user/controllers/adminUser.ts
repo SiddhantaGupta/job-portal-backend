@@ -5,6 +5,7 @@ import { Auth } from '@app/auth/decorators/auth';
 import { UserDetailTransformer } from '@app/transformer';
 import { IPagination } from '@app/job/interfaces';
 import { UserIdDto } from '../dtos/userId';
+import { IUserSearchModel } from '../interfaces';
 
 @Auth('admin')
 @Controller('admin/users')
@@ -16,10 +17,10 @@ export class AdminUserController extends RestController {
   @Get('')
   async getUsers(@Req() req: Request, @Res() res: Response): Promise<Response> {
     const users = await this.adminUserService.getUsers(
-      req.all() as IPagination,
+      req.all() as IUserSearchModel,
     );
-    return res.success(
-      await this.collection(users, new UserDetailTransformer(), { req }),
+    return res.withMeta(
+      await this.paginate(users, new UserDetailTransformer(), { req }),
     );
   }
 

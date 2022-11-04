@@ -7,8 +7,14 @@ import {
   JobRepositoryContract,
 } from '../repositories';
 import { ApplicationIdDto, JobIdDto } from '../dtos';
-import { GenericException } from '@libs/boat';
-import { IApplicationModel, IJobModel, IPagination } from '../interfaces';
+import { GenericException, Pagination } from '@libs/boat';
+import {
+  IApplicationModel,
+  IApplicationSearchModel,
+  IJobModel,
+  IJobSearchModel,
+  IPagination,
+} from '../interfaces';
 
 @Injectable()
 export class AdminJobsService {
@@ -20,27 +26,13 @@ export class AdminJobsService {
     public applicationRepo: ApplicationRepositoryContract,
   ) {}
 
-  async getJobs(payload: IPagination): Promise<IJobModel[]> {
-    if (payload && Object.keys(payload).length === 0) {
-      return await this.repo.all();
-    }
-
-    let jobPaginatedSearch = await this.repo
-      .query()
-      .page(payload.page, payload.perPage);
-
-    return jobPaginatedSearch.results;
+  async getJobs(payload: IJobSearchModel): Promise<Pagination<IJobModel>> {
+    return await this.repo.search(payload);
   }
-  async getApplications(payload: IPagination): Promise<IApplicationModel[]> {
-    if (payload && Object.keys(payload).length === 0) {
-      return await this.applicationRepo.all();
-    }
-
-    let applicationPaginatedSearch = await this.applicationRepo
-      .query()
-      .page(payload.page, payload.perPage);
-
-    return applicationPaginatedSearch.results;
+  async getApplications(
+    payload: IApplicationSearchModel,
+  ): Promise<Pagination<IApplicationModel>> {
+    return this.applicationRepo.search(payload);
   }
 
   async getApplicationById(

@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { JobRepositoryContract } from './contract';
-import { DatabaseRepository, InjectModel } from '@squareboat/nestjs-objection';
+import {
+  DatabaseRepository,
+  InjectModel,
+  Pagination,
+} from '@squareboat/nestjs-objection';
 import { JobModel } from '@app/job/models';
-import { IJobModel } from '@app/job/interfaces';
+import { IJobModel, IJobSearchModel } from '@app/job/interfaces';
 
 @Injectable()
 export class JobRepository
@@ -11,5 +15,33 @@ export class JobRepository
 {
   @InjectModel(JobModel)
   model: JobModel;
-  // this.query().withGraphFetched({apllications:true})
+
+  async search(inputs: IJobSearchModel): Promise<Pagination<IJobModel>> {
+    const query = this.query();
+    if (inputs.location) {
+      query.where({ location: inputs.location });
+    }
+    if (inputs.title) {
+      query.where({
+        title: inputs.title,
+      });
+    }
+    if (inputs.isActive === true || inputs.isActive === false) {
+      query.where({
+        isActive: inputs.isActive,
+      });
+    }
+    if (inputs.userId) {
+      query.where({
+        postedBy: inputs.userId,
+      });
+    }
+
+    const searchResult: Pagination<IJobModel> = await query.paginate(
+      inputs.page || 1,
+      inputs.perPage || 15,
+    );
+
+    return searchResult;
+  }
 }

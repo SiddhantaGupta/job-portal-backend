@@ -1,6 +1,13 @@
-import { IApplicationModel } from '@app/job/interfaces';
+import {
+  IApplicationModel,
+  IApplicationSearchModel,
+} from '@app/job/interfaces';
 import { ApplicationModel } from '@app/job/models';
-import { RepositoryContract } from '@squareboat/nestjs-objection';
+import { Pagination, RepositoryContract } from '@squareboat/nestjs-objection';
 
 export interface ApplicationRepositoryContract
-  extends RepositoryContract<IApplicationModel> {}
+  extends RepositoryContract<IApplicationModel> {
+  search(
+    inputs: IApplicationSearchModel,
+  ): Promise<Pagination<IApplicationModel>>;
+}

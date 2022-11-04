@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepositoryContract } from './contract';
-import { DatabaseRepository, InjectModel } from '@squareboat/nestjs-objection';
-import { IUserModel } from '@app/user/interfaces';
+import {
+  DatabaseRepository,
+  InjectModel,
+  Pagination,
+} from '@squareboat/nestjs-objection';
+import { IUserModel, IUserSearchModel } from '@app/user/interfaces';
 import { UserModel } from '@app/user/models';
 
 @Injectable()
@@ -11,4 +15,13 @@ export class UserRepository
 {
   @InjectModel(UserModel)
   model: UserModel;
+
+  async search(inputs: IUserSearchModel): Promise<Pagination<IUserModel>> {
+    const searchResult: Pagination<IUserModel> = await this.query().paginate(
+      inputs.page || 1,
+      inputs.perPage || 15,
+    );
+
+    return searchResult;
+  }
 }

@@ -8,8 +8,15 @@ import {
 } from '../repositories';
 import { JobPostDto, JobIdDto } from '../dtos';
 import { uuid } from 'uuidv4';
-import { IApplicationModel, IJobModel, IPagination } from '../interfaces';
+import {
+  IApplicationModel,
+  IApplicationSearchModel,
+  IJobModel,
+  IJobSearchModel,
+  IPagination,
+} from '../interfaces';
 import { IUserModel } from '@app/user/interfaces';
+import { Pagination } from '@squareboat/nestjs-objection';
 
 @Injectable()
 export class RecruiterJobsService {
@@ -21,23 +28,12 @@ export class RecruiterJobsService {
     public applicationRepo: ApplicationRepositoryContract,
   ) {}
 
-  async getJobs(payload: IPagination, user: IUserModel): Promise<IJobModel[]> {
-    if (payload && Object.keys(payload).length === 0) {
-      return await this.repo.getWhere({
-        postedBy: user.id,
-        isActive: true,
-      });
-    }
-
-    let jobsPaginatedSearch = await this.repo
-      .query()
-      .where({
-        postedBy: user.id,
-        isActive: true,
-      })
-      .page(payload.page, payload.perPage);
-
-    return jobsPaginatedSearch.results;
+  async getJobs(
+    payload: IJobSearchModel,
+    user: IUserModel,
+  ): Promise<Pagination<IJobModel>> {
+    payload.userId = user.id;
+    return this.repo.search(payload);
   }
 
   async postJob(payload: JobPostDto, user: IUserModel): Promise<IJobModel> {
@@ -62,28 +58,17 @@ export class RecruiterJobsService {
   }
 
   async getApplicationsForJob(
-    payload: IPagination,
+    payload: IApplicationSearchModel,
     user: IUserModel,
-  ): Promise<IApplicationModel[]> {
+  ): Promise<Pagination<IApplicationModel>> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     const job = await this.repo.firstWhere({
       uuid: validatedInputs.id,
     });
 
-    if (payload.page >= 0 && payload.perPage >= 0) {
-      const applicationsPaginatedSearch = await this.applicationRepo
-        .query()
-        .where({
-          jobId: job.id,
-        })
-        .page(payload.page, payload.perPage);
+    payload.jobId = job.id;
 
-      return applicationsPaginatedSearch.results;
-    }
-
-    return await this.applicationRepo.getWhere({
-      jobId: job.id,
-    });
+    return this.applicationRepo.search(payload);
   }
 }

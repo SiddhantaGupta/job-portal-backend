@@ -5,8 +5,9 @@ import { ResumeRepositoryContract } from '../repositories/resume/contract';
 import { BaseValidator } from '@libs/boat/validator';
 import { UserIdDto } from '../dtos/userId';
 import { GenericException } from '@libs/boat';
-import { IUserModel } from '../interfaces';
+import { IUserModel, IUserSearchModel } from '../interfaces';
 import { IPagination } from '@app/job/interfaces';
+import { Pagination } from '@squareboat/nestjs-objection';
 
 @Injectable()
 export class AdminUserService {
@@ -17,22 +18,14 @@ export class AdminUserService {
     public resumeRepo: ResumeRepositoryContract,
   ) {}
 
-  async getUsers(payload: IPagination): Promise<IUserModel[]> {
-    if (payload && Object.keys(payload).length === 0) {
-      return await this.repo.all();
-    }
-
-    const usersPaginatedSearch = await this.repo
-      .query()
-      .page(payload.page, payload.perPage);
-
-    return usersPaginatedSearch.results;
+  async getUsers(payload: IUserSearchModel): Promise<Pagination<IUserModel>> {
+    return this.repo.search(payload);
   }
 
   async getUserById(payload: UserIdDto): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, UserIdDto);
 
-    return await this.repo.firstWhere({
+    return this.repo.firstWhere({
       uuid: validatedInputs.id,
     });
   }

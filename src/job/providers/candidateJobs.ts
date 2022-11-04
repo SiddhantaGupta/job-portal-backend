@@ -14,9 +14,15 @@ import {
 import { CandidateGetJobFilterDto, JobIdDto } from '../dtos';
 import { uuid } from 'uuidv4';
 import { ApplicationDto } from '../dtos/application';
-import { IApplicationModel, IJobModel, IPagination } from '../interfaces';
+import {
+  IApplicationModel,
+  IApplicationSearchModel,
+  IJobModel,
+  IPagination,
+} from '../interfaces';
 import { IUserModel } from '@app/user/interfaces';
 import { pick } from 'lodash';
+import { Pagination } from '@squareboat/nestjs-objection';
 
 @Injectable()
 export class CandidateJobsService {
@@ -31,49 +37,25 @@ export class CandidateJobsService {
   async getJobs(
     payload: CandidateGetJobFilterDto,
     user: IUserModel,
-  ): Promise<IJobModel[]> {
-    if (payload && Object.keys(payload).length === 0) {
-      return await this.repo.all();
-    }
-
+  ): Promise<Pagination<IJobModel>> {
     const validatedInputs = await this.validator.fire(
       payload,
       CandidateGetJobFilterDto,
     );
 
-    if (payload.page >= 0 && payload.perPage >= 0) {
-      let jobsPaginatedSearch = await this.repo
-        .query()
-        .where({
-          ...validatedInputs,
-          isActive: true,
-        })
-        .page(payload.page, payload.perPage);
+    validatedInputs.isActive = true;
 
-      return jobsPaginatedSearch.results;
-    }
+    console.log(validatedInputs);
 
-    return await this.repo.getWhere({
-      ...validatedInputs,
-      isActive: true,
-    });
+    return this.repo.search(validatedInputs);
   }
 
   async getApplications(
-    payload: IPagination,
+    payload: IApplicationSearchModel,
     user: IUserModel,
-  ): Promise<IApplicationModel[]> {
-    if (payload && Object.keys(payload).length === 0) {
-      return await this.applicationRepo.getWhere({
-        userId: user.id,
-      });
-    }
-
-    let applicationPaginatedSearch = await this.applicationRepo
-      .query()
-      .page(payload.page, payload.perPage);
-
-    return applicationPaginatedSearch.results;
+  ): Promise<Pagination<IApplicationModel>> {
+    payload.userId = user.id;
+    return this.applicationRepo.search(payload);
   }
 
   async getJobById(payload: JobIdDto, user: IUserModel): Promise<IJobModel> {

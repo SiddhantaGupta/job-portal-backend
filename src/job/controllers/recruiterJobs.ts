@@ -6,7 +6,12 @@ import {
   ApplicationDetailTransformer,
   JobDetailTransformer,
 } from '@app/transformer';
-import { IPagination } from '../interfaces';
+import {
+  IApplicationSearchModel,
+  IJobModel,
+  IJobSearchModel,
+  IPagination,
+} from '../interfaces';
 import { JobIdDto, JobPostDto } from '../dtos';
 
 @Auth('recruiter')
@@ -19,11 +24,11 @@ export class RecruiterJobsController extends RestController {
   @Get('')
   async getJobs(@Req() req: Request, @Res() res: Response): Promise<Response> {
     const jobs = await this.recruiterJobsService.getJobs(
-      req.all() as IPagination,
+      req.all() as IJobSearchModel,
       req.user,
     );
-    return res.success(
-      await this.collection(jobs, new JobDetailTransformer(), { req }),
+    return res.withMeta(
+      await this.paginate(jobs, new JobDetailTransformer(), { req }),
     );
   }
 
@@ -58,11 +63,11 @@ export class RecruiterJobsController extends RestController {
     @Res() res: Response,
   ): Promise<Response> {
     const applications = await this.recruiterJobsService.getApplicationsForJob(
-      req.all() as IPagination,
+      req.all() as IApplicationSearchModel,
       req.user,
     );
-    return res.success(
-      await this.collection(applications, new ApplicationDetailTransformer(), {
+    return res.withMeta(
+      await this.paginate(applications, new ApplicationDetailTransformer(), {
         req,
       }),
     );

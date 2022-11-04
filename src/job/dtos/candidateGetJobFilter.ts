@@ -9,4 +9,6 @@ export class CandidateGetJobFilterDto {
 
   page: number;
   perPage: number;
+  isActive: boolean;
+  userId: number;
 }
