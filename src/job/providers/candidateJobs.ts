@@ -75,7 +75,7 @@ export class CandidateJobsService {
   async applyToJob(
     payload: ApplicationDto,
     user: IUserModel,
-  ): Promise<IApplicationModel> {
+  ): Promise<{ message: string } | string> {
     const validatedInputs = await this.validator.fire(payload, ApplicationDto);
 
     let job = await this.repo.firstWhere({
@@ -91,10 +91,12 @@ export class CandidateJobsService {
       throw new ConflictException('application already exists');
     }
 
-    return await this.applicationRepo.create({
+    const application = await this.applicationRepo.create({
       uuid: uuid(),
       userId: user.id,
       jobId: job.id,
     });
+
+    return { message: 'application submitted successfully' };
   }
 }

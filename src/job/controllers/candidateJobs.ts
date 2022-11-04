@@ -6,7 +6,7 @@ import {
   ApplicationDetailTransformer,
   JobDetailTransformer,
 } from '@app/transformer';
-import { ApplicationDto, CandidateGetJobFilterDto, JobIdDto } from '../dtos';
+import { ApplicationDto, JobIdDto } from '../dtos';
 import {
   IApplicationSearchModel,
   IJobSearchModel,
@@ -66,14 +66,11 @@ export class CandidateJobsController extends RestController {
     @Req() req: Request,
     @Res() res: Response,
   ): Promise<Response> {
-    const application = await this.candidateJobsService.applyToJob(
-      req.all() as ApplicationDto,
-      req.user,
-    );
     return res.success(
-      await this.transform(application, new ApplicationDetailTransformer(), {
-        req,
-      }),
+      await this.candidateJobsService.applyToJob(
+        req.all() as ApplicationDto,
+        req.user,
+      ),
     );
   }
 }

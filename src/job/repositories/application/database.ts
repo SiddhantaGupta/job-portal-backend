@@ -25,13 +25,29 @@ export class ApplicationRepository
     const query = this.query();
 
     if (inputs.jobId) {
-      query.where({
-        jobId: inputs.jobId,
-      });
+      query
+        .where({
+          jobId: inputs.jobId,
+        })
+        .withGraphFetched({
+          applicant: {
+            resume: true,
+          },
+        });
     }
     if (inputs.userId) {
-      query.where({
-        userId: inputs.userId,
+      query
+        .where({
+          userId: inputs.userId,
+        })
+        .withGraphFetched('job');
+    }
+    if (!inputs.userId && !inputs.jobId) {
+      query.withGraphFetched({
+        job: true,
+        applicant: {
+          resume: true,
+        },
       });
     }
 

@@ -45,7 +45,7 @@ export class AdminJobsController extends RestController {
     );
   }
 
-  @Get('application')
+  @Get('application/:id')
   async getApplicationById(
     @Req() req: Request,
     @Res() res: Response,
