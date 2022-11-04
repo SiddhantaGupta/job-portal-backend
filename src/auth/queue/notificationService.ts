@@ -6,8 +6,6 @@ import { Mailman, MailMessage } from 'libs/nest-mailman/src';
 export class NotificationService {
   @Job('SEND_MAIL')
   sendMail(data: Record<string, any>) {
-    console.log('data coming ===> ', data);
-
     const mail = MailMessage.init()
       .greeting('Hello user')
       .line(data.message)

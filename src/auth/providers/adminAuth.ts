@@ -1,5 +1,9 @@
 import { ResumeService, UserService } from '@app/user';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -42,15 +46,18 @@ export class AdminAuthService {
     }
 
     if (!passwordVerified) {
-      throw new ForbiddenException('Credentials Incorrect');
+      throw new UnauthorizedException('Credentials Incorrect');
     }
 
     const userRoles = this.config.get('settings.roles');
     if (!(user.role === userRoles.admin)) {
-      throw new ForbiddenException('Not an admin');
+      throw new UnauthorizedException('Not an admin');
     }
 
-    return await this.signToken(user.uuid);
+    return {
+      ...user,
+      accessToken: (await this.signToken(user.uuid)).accessToken,
+    };
   }
 
   async signToken(uuid: string): Promise<{ accessToken: string }> {
@@ -58,9 +65,10 @@ export class AdminAuthService {
       uuid: uuid,
     };
     const secret = this.config.get('JWT_SECRET');
+    const expiry = this.config.get('JWT_EXPIRY');
 
     const token = await this.jwt.signAsync(payload, {
-      expiresIn: '120m',
+      expiresIn: expiry,
       secret: secret,
     });
 

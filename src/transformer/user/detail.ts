@@ -13,7 +13,6 @@ export class UserDetailTransformer extends Transformer {
       role: model.role,
       email: model.email,
       phoneNumber: model.phoneNumber,
-      isActive: model.isActive,
       resume:
         model.resume &&
         (await this.item(model.resume, new ResumeDetailTransformer())),
