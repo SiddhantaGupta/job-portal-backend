@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { BaseValidator } from '@libs/boat/validator';
-import { AdminLoginDto } from '../dto';
+import { AdminLoginDto } from '../dtos';
 import { IUserModel } from '@app/user/interfaces';
 import { ValidationFailed } from '@libs/boat';
 

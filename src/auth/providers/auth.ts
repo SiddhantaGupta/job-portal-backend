@@ -10,12 +10,13 @@ import {
   SignupDto,
   ForgotPasswordDto,
   ResetPasswordDto,
-} from '../dto';
+} from '../dtos';
 import { uuid } from 'uuidv4';
 import { pick } from 'lodash';
 import { GenericException, ValidationFailed } from '@libs/boat';
 import { CacheStore } from '@libs/cache';
-import { Mailman, MailMessage } from 'libs/nest-mailman/src';
+import { EmitEvent } from '@squareboat/nest-events';
+import { UserRequestedOtp } from '../events/userRequestedOtp';
 
 @Injectable()
 export class AuthService {
@@ -164,12 +165,14 @@ export class AuthService {
       120,
     );
 
-    const mail = MailMessage.init()
-      .greeting('Hello user')
-      .line(`Your password reset OTP is ${otp}`)
-      .subject('Password Reset OTP');
-
-    Mailman.init().to(user.email).send(mail);
+    // emit event
+    EmitEvent(
+      new UserRequestedOtp({
+        email: validatedInputs.email,
+        subject: 'Password reset OTP',
+        message: `Your password reset OTP is ${otp}`,
+      }),
+    );
 
     return {
       message: 'Your password reset OTP has been sent on your registered email',

@@ -8,7 +8,7 @@ import {
   LoginDto,
   ResetPasswordDto,
   SignupDto,
-} from '../dto';
+} from '../dtos';
 
 @Controller('auth')
 export class AuthController extends RestController {

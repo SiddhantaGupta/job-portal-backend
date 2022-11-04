@@ -9,6 +9,7 @@ import { AuthModule } from './auth/module';
 import { CacheModule } from '@libs/cache';
 import { JobModule } from './job/module';
 import { MailmanModule } from 'libs/nest-mailman/src';
+import { QueueModule } from '@libs/sq-nest-queue';
 
 @Module({
   imports: [
@@ -27,6 +28,12 @@ import { MailmanModule } from 'libs/nest-mailman/src';
     MailmanModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => config.get('mailman'),
+      inject: [ConfigService],
+    }),
+    QueueModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => config.get('queue'),
       inject: [ConfigService],
     }),
     BoatModule,

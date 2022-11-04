@@ -2,7 +2,7 @@ import { UserDetailTransformer } from '@app/transformer';
 import { IUserModel } from '@app/user/interfaces';
 import { Request, Response, RestController } from '@libs/boat';
 import { Controller, Post, Req, Res } from '@nestjs/common';
-import { AdminLoginDto } from '../dto';
+import { AdminLoginDto } from '../dtos';
 import { AdminAuthService } from '../providers/adminAuth';
 
 @Controller('admin/auth')
