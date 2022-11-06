@@ -1,4 +1,4 @@
-export * from './signup';
+export * from './signUp';
 export * from './login';
 export * from './candidateSignup';
 export * from './adminLogin';
