@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JobRepositoryContract } from './contract';
-import {
-  DatabaseRepository,
-  InjectModel,
-  Pagination,
-} from '@squareboat/nestjs-objection';
+import { DatabaseRepository, InjectModel, Pagination } from '@libs/sq-obj';
 import { JobModel } from '@app/job/models';
 import { IJobModel, IJobSearchModel } from '@app/job/interfaces';
 

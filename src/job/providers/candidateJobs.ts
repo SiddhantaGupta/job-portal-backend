@@ -22,7 +22,7 @@ import {
 } from '../interfaces';
 import { IUserModel } from '@app/user/interfaces';
 import { pick } from 'lodash';
-import { Pagination } from '@squareboat/nestjs-objection';
+import { Pagination } from '@libs/sq-obj';
 
 @Injectable()
 export class CandidateJobsService {

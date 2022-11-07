@@ -3,7 +3,7 @@ import { EventModule } from '@squareboat/nest-events';
 import { UserModule } from './user';
 import { BoatModule } from '@libs/boat';
 import { ConsoleModule } from '@squareboat/nest-console';
-import { ObjectionModule } from '@squareboat/nestjs-objection';
+import { ObjectionModule } from '@libs/sq-obj';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/module';
 import { CacheModule } from '@libs/cache';

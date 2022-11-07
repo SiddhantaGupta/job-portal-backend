@@ -7,7 +7,7 @@ import { UserIdDto } from '../dtos/userId';
 import { GenericException } from '@libs/boat';
 import { IUserModel, IUserSearchModel } from '../interfaces';
 import { IPagination } from '@app/job/interfaces';
-import { Pagination } from '@squareboat/nestjs-objection';
+import { Pagination } from '@libs/sq-obj';
 
 @Injectable()
 export class AdminUserService {

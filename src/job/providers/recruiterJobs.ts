@@ -16,7 +16,7 @@ import {
   IPagination,
 } from '../interfaces';
 import { IUserModel } from '@app/user/interfaces';
-import { Pagination } from '@squareboat/nestjs-objection';
+import { Pagination } from '@libs/sq-obj';
 
 @Injectable()
 export class RecruiterJobsService {

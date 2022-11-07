@@ -2,7 +2,7 @@ import {
   IApplicationModel,
   IApplicationSearchModel,
 } from '@app/job/interfaces';
-import { Pagination, RepositoryContract } from '@squareboat/nestjs-objection';
+import { Pagination, RepositoryContract } from '@libs/sq-obj';
 
 export interface ApplicationRepositoryContract
   extends RepositoryContract<IApplicationModel> {

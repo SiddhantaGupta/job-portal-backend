@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepositoryContract } from './contract';
-import {
-  DatabaseRepository,
-  InjectModel,
-  Pagination,
-} from '@squareboat/nestjs-objection';
+import { DatabaseRepository, InjectModel, Pagination } from '@libs/sq-obj';
 import { IUserModel, IUserSearchModel } from '@app/user/interfaces';
 import { UserModel } from '@app/user/models';
 

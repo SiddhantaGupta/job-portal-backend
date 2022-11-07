@@ -46,6 +46,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/sq-nest-queue/tsconfig.lib.json"
       }
+    },
+    "sq-obj": {
+      "type": "library",
+      "root": "libs/sq-obj",
+      "entryFile": "index",
+      "sourceRoot": "libs/sq-obj/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/sq-obj/tsconfig.lib.json"
+      }
     }
   },
   "compilerOptions": {

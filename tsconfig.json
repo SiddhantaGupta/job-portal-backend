@@ -47,6 +47,12 @@
       ],
       "@libs/sq-nest-queue/*": [
         "libs/sq-nest-queue/src/*"
+      ],
+      "@libs/sq-obj": [
+        "libs/sq-obj/src"
+      ],
+      "@libs/sq-obj/*": [
+        "libs/sq-obj/src/*"
       ]
     }
   },

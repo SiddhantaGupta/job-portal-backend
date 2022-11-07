@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ApplicationRepositoryContract } from './contract';
-import {
-  DatabaseRepository,
-  InjectModel,
-  Pagination,
-} from '@squareboat/nestjs-objection';
+import { DatabaseRepository, InjectModel, Pagination } from '@libs/sq-obj';
 import { ApplicationModel } from '@app/job/models';
 import {
   IApplicationModel,
