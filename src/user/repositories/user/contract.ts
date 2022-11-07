@@ -1,4 +1,6 @@
-import { UserModel } from '@app/user/models';
-import { RepositoryContract } from '@squareboat/nestjs-objection';
+import { IUserModel, IUserSearchModel } from '@app/user/interfaces';
+import { Pagination, RepositoryContract } from '@libs/sq-obj';
 
-export interface UserRepositoryContract extends RepositoryContract<UserModel> {}
+export interface UserRepositoryContract extends RepositoryContract<IUserModel> {
+  search(inputs: IUserSearchModel): Promise<Pagination<IUserModel>>;
+}

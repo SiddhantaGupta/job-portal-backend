@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import config from '@config/index';
 import { ConfigModule } from '@nestjs/config';
 import { DiscoveryModule } from '@nestjs/core';
-import { BaseValidator } from './validator';
+import { BaseValidator, IsValueFromConfigConstraint } from './validator';
 
 @Global()
 @Module({
@@ -14,7 +14,7 @@ import { BaseValidator } from './validator';
       load: config,
     }),
   ],
-  providers: [BaseValidator],
+  providers: [BaseValidator,IsValueFromConfigConstraint],
   exports: [],
 })
 export class BoatModule {}
