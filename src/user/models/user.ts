@@ -7,7 +7,7 @@ export class UserModel extends BaseModel {
 
   static relationMappings = {
     resume: {
-      relation: Model.BelongsToOneRelation,
+      relation: Model.HasOneRelation,
       modelClass: ResumeModel,
       join: {
         from: 'users.id',
