@@ -3,6 +3,7 @@ import { JobRepositoryContract } from './contract';
 import { DatabaseRepository, InjectModel, Pagination } from '@libs/sq-obj';
 import { JobModel } from '@app/job/models';
 import { IJobModel, IJobSearchModel } from '@app/job/interfaces';
+import { title } from 'process';
 
 @Injectable()
 export class JobRepository
@@ -18,9 +19,7 @@ export class JobRepository
       query.where({ location: inputs.location });
     }
     if (inputs.title) {
-      query.where({
-        title: inputs.title,
-      });
+      query.where('title', 'ilike', `%${inputs.title}%`);
     }
     if (inputs.isActive === true || inputs.isActive === false) {
       query.where({

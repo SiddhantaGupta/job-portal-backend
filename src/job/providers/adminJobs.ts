@@ -56,14 +56,14 @@ export class AdminJobsService {
     });
   }
 
-  async updateJobStatus(payload: JobIdDto): Promise<IJobModel | IJobModel[]> {
+  async updateJobStatus(payload: JobIdDto): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
     let job = await this.repo.firstWhere({
       uuid: validatedInputs.id,
     });
 
-    let patchedJob = await this.repo.updateAndReturn(
+    let patchedJob = (await this.repo.updateAndReturn(
       {
         uuid: validatedInputs.id,
       },
@@ -71,7 +71,7 @@ export class AdminJobsService {
         isActive: !job.isActive,
       },
       true,
-    );
+    )) as IJobModel;
 
     if (!patchedJob) {
       throw new GenericException();
