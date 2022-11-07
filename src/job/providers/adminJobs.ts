@@ -15,6 +15,8 @@ import {
   IJobSearchModel,
   IPagination,
 } from '../interfaces';
+import { EmitEvent } from '@squareboat/nest-events';
+import { AdminUpdatedJob } from '../events/adminUpdatedJob';
 
 @Injectable()
 export class AdminJobsService {
@@ -76,6 +78,8 @@ export class AdminJobsService {
     if (!patchedJob) {
       throw new GenericException();
     }
+
+    EmitEvent(new AdminUpdatedJob(patchedJob));
 
     return patchedJob;
   }

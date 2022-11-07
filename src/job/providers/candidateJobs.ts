@@ -45,8 +45,6 @@ export class CandidateJobsService {
 
     validatedInputs.isActive = true;
 
-    console.log(validatedInputs);
-
     return this.repo.search(validatedInputs);
   }
 
@@ -61,13 +59,13 @@ export class CandidateJobsService {
   async getJobById(payload: JobIdDto, user: IUserModel): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
-    let job = await this.repo.firstWhere({
-      uuid: validatedInputs.id,
-    });
-
-    if (!job.isActive) {
-      throw new ForbiddenException('Job has been disabled');
-    }
+    let job = await this.repo.firstWhere(
+      {
+        uuid: validatedInputs.id,
+        isActive: true,
+      },
+      false,
+    );
 
     return job;
   }

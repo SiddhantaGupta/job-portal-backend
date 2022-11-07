@@ -7,11 +7,14 @@ import {
   CandidateJobsController,
   RecruiterJobsController,
 } from './controllers';
+import { JobModuleListener } from './listeners/jobModuleListener';
 import {
   AdminJobsService,
   CandidateJobsService,
   RecruiterJobsService,
 } from './providers';
+import { JobUpdateService } from './queue/jobDataUpdate';
+import { UserUpdateService } from './queue/userDataUpdate';
 import { JobRepository, ApplicationRepository } from './repositories';
 
 @Module({
@@ -31,6 +34,10 @@ import { JobRepository, ApplicationRepository } from './repositories';
       provide: JobModuleConstants.applicationRepo,
       useClass: ApplicationRepository,
     },
+    UserUpdateService,
+    JobModuleListener,
+    JobUpdateService,
   ],
+  exports: [],
 })
 export class JobModule {}

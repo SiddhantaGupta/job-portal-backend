@@ -16,6 +16,7 @@ exports.up = async function(knex) {
           table.integer('experience_duration');
           table.string('field_of_work');
           table.string('skills');
+          table.boolean('is_active');
           timestamps(knex, table);
         },
       );

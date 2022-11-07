@@ -8,6 +8,13 @@ import { GenericException } from '@libs/boat';
 import { IUserModel, IUserSearchModel } from '../interfaces';
 import { IPagination } from '@app/job/interfaces';
 import { Pagination } from '@libs/sq-obj';
+import { ConfigService } from '@nestjs/config';
+import { JobModuleConstants } from '@app/job/constants';
+import { ApplicationRepositoryContract } from '@app/job/repositories';
+import { CandidateJobsService } from '@app/job';
+import { EmitEvent } from '@squareboat/nest-events';
+import { AdminUpdatedUser } from '../events/adminUpdatedUser';
+import { update } from 'lodash';
 
 @Injectable()
 export class AdminUserService {
@@ -16,6 +23,7 @@ export class AdminUserService {
     @Inject(UserModuleConstants.userRepo) public repo: UserRepositoryContract,
     @Inject(UserModuleConstants.resumeRepo)
     public resumeRepo: ResumeRepositoryContract,
+    private config: ConfigService,
   ) {}
 
   async getUsers(payload: IUserSearchModel): Promise<Pagination<IUserModel>> {
@@ -48,6 +56,8 @@ export class AdminUserService {
       },
       true,
     );
+
+    EmitEvent(new AdminUpdatedUser(updatedUser));
 
     if (!updatedUser) {
       throw new GenericException();

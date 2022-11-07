@@ -15,6 +15,7 @@ exports.up = async function(knex) {
           table.string('uuid');
           table.integer('user_id').index();
           table.integer('job_id').index();
+          table.boolean('is_active');
           timestamps(knex, table);
         },
       );

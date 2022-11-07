@@ -7,6 +7,8 @@ import { CreateAdmin, GreetUser } from './commands';
 import { ResumeRepository } from './repositories/resume/database';
 import { ResumeService } from './services';
 import { BaseValidator } from '@libs/boat/validator';
+import { CandidateJobsService, JobModule } from '@app/job';
+import { UserModuleListener } from './listeners/userModuleListeners';
 
 @Module({
   imports: [],
@@ -18,6 +20,7 @@ import { BaseValidator } from '@libs/boat/validator';
     BaseValidator,
     GreetUser,
     CreateAdmin,
+    UserModuleListener,
     { provide: UserModuleConstants.userRepo, useClass: UserRepository },
     { provide: UserModuleConstants.resumeRepo, useClass: ResumeRepository },
   ],
