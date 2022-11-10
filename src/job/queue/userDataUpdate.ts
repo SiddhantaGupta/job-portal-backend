@@ -19,7 +19,6 @@ export class UserUpdateService {
   async updateUserData(data: Record<string, any>) {
     const user = data;
     const userRoles = this.config.get('settings.roles');
-    console.log('user updated', data, user.role === userRoles.recruiter);
     if (user.role === userRoles.recruiter) {
       let updatedJobs = (await this.candidateJobService.repo.updateAndReturn(
         {
@@ -39,7 +38,6 @@ export class UserUpdateService {
               isActive: updatedJobs[jobIndex].isActive,
             },
           );
-        console.log(updatedApplication);
       }
     } else if (user.role === userRoles.candidate) {
       await this.candidateJobService.applicationRepo.updateAndReturn(

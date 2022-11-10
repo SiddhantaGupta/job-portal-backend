@@ -19,6 +19,7 @@ export class JobPostDto {
   @IsNotEmpty()
   @IsNumber()
   @IsValueFromConfig({ key: 'settings.employmentType' })
+  @Transform(({ value }) => Number(value))
   employmentType: number;
 
   @IsNotEmpty()

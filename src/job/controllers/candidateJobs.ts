@@ -61,7 +61,7 @@ export class CandidateJobsController extends RestController {
     );
   }
 
-  @Post(':id/apply')
+  @Get(':id/apply')
   async applyToJob(
     @Req() req: Request,
     @Res() res: Response,

@@ -105,12 +105,25 @@ export class AuthService {
   async login(payload: LoginDto): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, LoginDto);
 
-    const user = await this.userService.repo.firstWhere({
-      email: validatedInputs.email,
-    });
+    const user = await this.userService.repo.firstWhere(
+      {
+        email: validatedInputs.email,
+      },
+      false,
+    );
+
+    if (!user) {
+      throw new ValidationFailed({
+        email: 'Credentials Incorrect',
+        password: 'Credentials Incorrect',
+      });
+    }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('User has been blocked');
+      throw new ValidationFailed({
+        email: 'Blocked User',
+        password: 'Blocked User',
+      });
     }
 
     let passwordVerified;
@@ -122,7 +135,10 @@ export class AuthService {
     }
 
     if (!passwordVerified) {
-      throw new UnauthorizedException('Credentials Incorrect');
+      throw new ValidationFailed({
+        email: 'Credentials Incorrect',
+        password: 'Credentials Incorrect',
+      });
     }
 
     return {

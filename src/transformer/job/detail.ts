@@ -9,6 +9,7 @@ export class JobDetailTransformer extends Transformer {
       location: model.location,
       employmentType: model.employmentType,
       companyName: model.companyName,
+      isActive: model.isActive,
     };
   }
 }

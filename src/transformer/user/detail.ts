@@ -18,6 +18,7 @@ export class UserDetailTransformer extends Transformer {
         (await this.item(model.resume, new ResumeDetailTransformer())),
       accessToken: model.accessToken,
       otp: model.otp,
+      isActive: model.isActive,
     };
   }
 
