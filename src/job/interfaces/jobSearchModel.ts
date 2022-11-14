@@ -5,4 +5,5 @@ export interface IJobSearchModel {
   perPage: number;
   userId: number;
   isActive: boolean;
+  candidateId: number;
 }

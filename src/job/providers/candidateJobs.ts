@@ -44,6 +44,7 @@ export class CandidateJobsService {
     );
 
     validatedInputs.isActive = true;
+    validatedInputs.candidateId = user.id;
 
     return this.repo.search(validatedInputs);
   }

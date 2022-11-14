@@ -23,13 +23,23 @@ export class JobRepository
     }
     if (inputs.isActive === true || inputs.isActive === false) {
       query.where({
-        isActive: inputs.isActive,
+        'jobs.isActive': inputs.isActive,
       });
     }
     if (inputs.userId) {
       query.where({
         postedBy: inputs.userId,
       });
+    }
+    if (inputs.candidateId) {
+      query
+        .withGraphJoined('applications')
+        .modifyGraph('applications', (builder) => {
+          builder.where({
+            userId: inputs.candidateId,
+          });
+        })
+        .whereNull('applications.id');
     }
 
     const searchResult: Pagination<IJobModel> = await query.paginate(

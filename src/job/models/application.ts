@@ -24,4 +24,4 @@ export class ApplicationModel extends BaseModel {
       },
     },
   };
-}
+};
