@@ -48,6 +48,8 @@
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/testing": "^9.1.6",
+    "@sentry/node": "^7.19.0",
+    "@sentry/tracing": "^7.19.0",
     "@squareboat/nest-console": "^1.0.7",
     "@squareboat/nest-events": "^0.1.0",
     "@squareboat/nest-mailman": "^0.3.0",
