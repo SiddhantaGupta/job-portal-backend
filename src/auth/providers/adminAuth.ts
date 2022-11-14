@@ -25,6 +25,9 @@ export class AdminAuthService {
   async login(payload: AdminLoginDto): Promise<IUserModel> {
     const validatedInputs = await this.validator.fire(payload, AdminLoginDto);
 
+    const reCaptchaToken = validatedInputs.reCaptchaToken;
+    const result = await validateAdminRecaptcha(reCaptchaToken);
+
     const user = await this.userService.repo.firstWhere(
       {
         email: validatedInputs.email,
@@ -55,8 +58,6 @@ export class AdminAuthService {
       throw new UnauthorizedException('Not an admin');
     }
 
-    const reCaptchaToken = validatedInputs.reCaptchaToken;
-    const result = await validateAdminRecaptcha(reCaptchaToken);
     return {
       ...user,
       accessToken: (await this.signToken(user.uuid)).accessToken,

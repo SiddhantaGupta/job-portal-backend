@@ -1,4 +1,4 @@
-import { ValidationFailed } from '@libs/boat';
+import { GenericException } from '@libs/boat';
 import axios from 'axios';
 
 async function validateAdminRecaptcha(
@@ -10,7 +10,7 @@ async function validateAdminRecaptcha(
   if (resp.data && resp.data.success) {
     return true;
   }
-  throw new ValidationFailed({ reCaptcha: 'Invalid Recaptcha' });
+  throw new GenericException('Invalid Recaptcha');
 }
 
 export default validateAdminRecaptcha;
