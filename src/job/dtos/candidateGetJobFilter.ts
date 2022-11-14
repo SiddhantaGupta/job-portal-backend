@@ -1,5 +1,4 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty } from 'class-validator';
 
 export class CandidateGetJobFilterDto {
   @Transform(({ value }) => value.toLowerCase())

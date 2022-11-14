@@ -11,6 +11,7 @@ import { BaseValidator } from '@libs/boat/validator';
 import { AdminLoginDto } from '../dtos';
 import { IUserModel } from '@app/user/interfaces';
 import { ValidationFailed } from '@libs/boat';
+import validateAdminRecaptcha from '@app/common/validateAdminRecaptcha';
 
 @Injectable()
 export class AdminAuthService {
@@ -54,6 +55,8 @@ export class AdminAuthService {
       throw new UnauthorizedException('Not an admin');
     }
 
+    const reCaptchaToken = validatedInputs.reCaptchaToken;
+    const result = await validateAdminRecaptcha(reCaptchaToken);
     return {
       ...user,
       accessToken: (await this.signToken(user.uuid)).accessToken,

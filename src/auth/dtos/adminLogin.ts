@@ -14,4 +14,7 @@ import {
     @IsString()
     @IsNotEmpty()
     password: string;
+
+    @IsNotEmpty()
+    reCaptchaToken: string;
 }
