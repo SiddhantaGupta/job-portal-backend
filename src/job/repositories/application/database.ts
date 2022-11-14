@@ -49,7 +49,7 @@ export class ApplicationRepository
 
     const searchResult: Pagination<IApplicationModel> = await query.paginate(
       inputs.page || 1,
-      inputs.perPage || 15,
+      inputs.perPage || 8,
     );
 
     return searchResult;

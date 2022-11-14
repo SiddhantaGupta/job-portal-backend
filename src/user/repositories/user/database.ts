@@ -15,7 +15,7 @@ export class UserRepository
   async search(inputs: IUserSearchModel): Promise<Pagination<IUserModel>> {
     const searchResult: Pagination<IUserModel> = await this.query().paginate(
       inputs.page || 1,
-      inputs.perPage || 15,
+      inputs.perPage || 8,
     );
 
     return searchResult;

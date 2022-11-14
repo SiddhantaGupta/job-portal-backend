@@ -3,7 +3,6 @@ import { JobRepositoryContract } from './contract';
 import { DatabaseRepository, InjectModel, Pagination } from '@libs/sq-obj';
 import { JobModel } from '@app/job/models';
 import { IJobModel, IJobSearchModel } from '@app/job/interfaces';
-import { title } from 'process';
 
 @Injectable()
 export class JobRepository
@@ -44,7 +43,7 @@ export class JobRepository
 
     const searchResult: Pagination<IJobModel> = await query.paginate(
       inputs.page || 1,
-      inputs.perPage || 15,
+      inputs.perPage || 8,
     );
 
     return searchResult;
