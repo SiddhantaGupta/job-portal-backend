@@ -1,6 +1,7 @@
 import { BaseValidator } from '@libs/boat/validator';
 import { ConfigService } from '@nestjs/config';
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Inject,
@@ -77,9 +78,17 @@ export class CandidateJobsService {
   ): Promise<{ message: string } | string> {
     const validatedInputs = await this.validator.fire(payload, ApplicationDto);
 
-    let job = await this.repo.firstWhere({
-      uuid: validatedInputs.id,
-    });
+    let job = await this.repo.firstWhere(
+      {
+        uuid: validatedInputs.id,
+        isActive: true,
+      },
+      false,
+    );
+
+    if (!job) {
+      throw new BadRequestException('Job does not exist');
+    }
 
     const applicationExists = await this.applicationRepo.exists({
       userId: user.id,

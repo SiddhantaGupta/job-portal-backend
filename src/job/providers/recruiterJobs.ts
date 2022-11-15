@@ -1,6 +1,6 @@
 import { BaseValidator, validate } from '@libs/boat/validator';
 import { ConfigService } from '@nestjs/config';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { JobModuleConstants } from '../constants';
 import {
   ApplicationRepositoryContract,
@@ -33,6 +33,7 @@ export class RecruiterJobsService {
     user: IUserModel,
   ): Promise<Pagination<IJobModel>> {
     payload.userId = user.id;
+    payload.isActive = true;
     return this.repo.search(payload);
   }
 
@@ -52,9 +53,20 @@ export class RecruiterJobsService {
   async getJobById(payload: JobIdDto, user: IUserModel): Promise<IJobModel> {
     const validatedInputs = await this.validator.fire(payload, JobIdDto);
 
-    return await this.repo.firstWhere({
-      uuid: validatedInputs.id,
-    });
+    const job = await this.repo.firstWhere(
+      {
+        postedBy: user.id,
+        uuid: validatedInputs.id,
+        isActive: true,
+      },
+      false,
+    );
+
+    if (!job) {
+      throw new NotFoundException('No job found');
+    }
+
+    return job;
   }
 
   async getApplicationsForJob(

@@ -216,6 +216,19 @@ export class AuthService {
       ResetPasswordDto,
     );
 
+    const user = await this.userService.repo.firstWhere(
+      {
+        email: validatedInputs.email,
+      },
+      false,
+    );
+
+    if (!user) {
+      throw new ValidationFailed({
+        email: 'Email does not exist',
+      });
+    }
+
     let otpCheck = await CacheStore().has(
       `${validatedInputs.email}_password_reset_otp`,
     );

@@ -3,9 +3,9 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { SignupDto } from './signUp';
 
 export class CandidateSignupDto extends SignupDto {
-  @IsNotEmpty()
   @IsNumber()
   @Transform(({ value }) => Number(value))
+  @IsNotEmpty()
   experienceDuration: number;
 
   @IsString()

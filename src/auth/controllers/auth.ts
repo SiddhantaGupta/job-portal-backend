@@ -23,6 +23,7 @@ export class AuthController extends RestController {
     );
     return res.success(
       await this.transform(accessToken, new UserDetailTransformer(), { req }),
+      201,
     );
   }
 

@@ -40,6 +40,7 @@ export class RecruiterJobsController extends RestController {
     );
     return res.success(
       await this.transform(job, new JobDetailTransformer(), { req }),
+      201,
     );
   }
 
