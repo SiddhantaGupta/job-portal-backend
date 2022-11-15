@@ -25,7 +25,7 @@ export class RestServer {
       useContainer(app.select(module), { fallbackOnErrors: true });
     }
 
-    app.enableCors({ origin: true });
+    app.enableCors({ origin: '*' });
 
     app.useGlobalGuards(new RequestGuard());
     const { httpAdapter } = app.get(HttpAdapterHost);
