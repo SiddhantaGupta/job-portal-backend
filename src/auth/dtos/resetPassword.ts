@@ -12,6 +12,7 @@ export class ResetPasswordDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(AuthModuleConstants.passwordLength)
+  @IsEqualToProp('confirmNewPassword')
   newPassword: string;
 
   @IsString()

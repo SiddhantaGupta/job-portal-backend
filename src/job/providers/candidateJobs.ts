@@ -6,6 +6,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { JobModuleConstants } from '../constants';
 import {
@@ -69,6 +70,10 @@ export class CandidateJobsService {
       false,
     );
 
+    if (!job) {
+      throw new NotFoundException('Job does not exist');
+    }
+
     return job;
   }
 
@@ -96,7 +101,7 @@ export class CandidateJobsService {
     });
 
     if (applicationExists) {
-      throw new ConflictException('application already exists');
+      throw new ConflictException('Already Applied');
     }
 
     const application = await this.applicationRepo.create({
