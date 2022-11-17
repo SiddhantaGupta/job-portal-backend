@@ -71,7 +71,7 @@ export class CandidateJobsService {
     );
 
     if (!job) {
-      throw new NotFoundException('Job does not exist');
+      throw new NotFoundException('No job found');
     }
 
     return job;
@@ -92,7 +92,7 @@ export class CandidateJobsService {
     );
 
     if (!job) {
-      throw new BadRequestException('Job does not exist');
+      throw new BadRequestException('No job found');
     }
 
     const applicationExists = await this.applicationRepo.exists({
