@@ -6,7 +6,6 @@ export class CandidateSignupDto extends SignupDto {
   @IsNumber()
   @Transform(({ value }) => Number(value))
   @IsNotEmpty()
-  @MaxLength(2)
   experienceDuration: number;
 
   @IsString()
