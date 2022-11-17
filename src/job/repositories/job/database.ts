@@ -41,6 +41,8 @@ export class JobRepository
         .whereNull('applications.id');
     }
 
+    query.orderBy('updatedAt', 'desc');
+
     const searchResult: Pagination<IJobModel> = await query.paginate(
       inputs.page || 1,
       inputs.perPage || 8,

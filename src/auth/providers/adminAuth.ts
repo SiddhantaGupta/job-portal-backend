@@ -37,7 +37,8 @@ export class AdminAuthService {
 
     if (!user) {
       throw new ValidationFailed({
-        email: 'email does not exist',
+        email: 'Incorrect Credentials',
+        password: 'Incorrect Credentials',
       });
     }
 
@@ -50,12 +51,18 @@ export class AdminAuthService {
     }
 
     if (!passwordVerified) {
-      throw new UnauthorizedException('Credentials Incorrect');
+      throw new ValidationFailed({
+        email: 'Incorrect Credentials',
+        password: 'Incorrect Credentials',
+      });
     }
 
     const userRoles = this.config.get('settings.roles');
     if (!(user.role === userRoles.admin)) {
-      throw new UnauthorizedException('Not an admin');
+      throw new ValidationFailed({
+        email: 'Incorrect Credentials',
+        password: 'Incorrect Credentials',
+      });
     }
 
     return {

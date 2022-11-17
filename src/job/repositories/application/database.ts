@@ -47,6 +47,8 @@ export class ApplicationRepository
       });
     }
 
+    query.orderBy('updatedAt', 'desc');
+
     const searchResult: Pagination<IApplicationModel> = await query.paginate(
       inputs.page || 1,
       inputs.perPage || 8,

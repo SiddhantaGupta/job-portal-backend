@@ -13,10 +13,9 @@ export class UserRepository
   model: UserModel;
 
   async search(inputs: IUserSearchModel): Promise<Pagination<IUserModel>> {
-    const searchResult: Pagination<IUserModel> = await this.query().paginate(
-      inputs.page || 1,
-      inputs.perPage || 8,
-    );
+    const searchResult: Pagination<IUserModel> = await this.query()
+      .orderBy('updatedAt', 'desc')
+      .paginate(inputs.page || 1, inputs.perPage || 8);
 
     return searchResult;
   }

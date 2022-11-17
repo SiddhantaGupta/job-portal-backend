@@ -2,8 +2,8 @@ import { IsValueFromConfig } from '@libs/boat/validator';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
+  IsMobilePhone,
   IsNotEmpty,
-  IsPhoneNumber,
   IsString,
   MinLength,
 } from 'class-validator';
@@ -33,6 +33,6 @@ export class SignupDto {
   lastName: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber()
+  @IsMobilePhone('en-IN', {}, { message: 'Invalid phone number' })
   phoneNumber: string;
 }
