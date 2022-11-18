@@ -11,6 +11,7 @@ export class UserModuleListener {
       job: 'USER_UPDATED',
       data: event.data,
       connection: 'notifications',
+      delay: 0,
     });
   }
 }
