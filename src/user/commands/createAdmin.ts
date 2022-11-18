@@ -29,7 +29,6 @@ export class CreateAdmin {
     try {
       validatedInputs = await this.validator.fire(admin, Admin);
     } catch (err) {
-      console.log(err.errors);
       return;
     }
 

@@ -10,9 +10,15 @@ import { CacheModule } from '@libs/cache';
 import { JobModule } from './job/module';
 import { MailmanModule } from 'libs/nest-mailman/src';
 import { QueueModule } from '@libs/sq-nest-queue';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
+    }),
     ObjectionModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
@@ -45,6 +51,11 @@ import { QueueModule } from '@libs/sq-nest-queue';
     JobModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
