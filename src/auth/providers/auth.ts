@@ -22,6 +22,7 @@ import { CacheStore } from '@libs/cache';
 import { EmitEvent } from '@squareboat/nest-events';
 import { UserRequestedOtp } from '../events/userRequestedOtp';
 import { IUserModel } from '@app/user/interfaces';
+import { falseEmails } from '../falseEmails';
 
 @Injectable()
 export class AuthService {
@@ -67,6 +68,13 @@ export class AuthService {
       ]);
     }
 
+    const emailProvider = userPayload.email.split('@')[1];
+    if (falseEmails.includes(emailProvider)) {
+      throw new ValidationFailed({
+        email: 'temporary email detected, please use a valid email address',
+      });
+    }
+
     const userExists = await this.userService.repo.exists({
       email: userPayload.email,
     });
@@ -103,6 +111,8 @@ export class AuthService {
   }
 
   async login(payload: LoginDto): Promise<IUserModel> {
+    const userRoles = this.config.get('settings.roles');
+
     const validatedInputs = await this.validator.fire(payload, LoginDto);
 
     const user = await this.userService.repo.firstWhere(
@@ -138,6 +148,13 @@ export class AuthService {
       throw new ValidationFailed({
         email: 'Credentials Incorrect',
         password: 'Credentials Incorrect',
+      });
+    }
+
+    if (user.role === userRoles.admin) {
+      throw new ValidationFailed({
+        email: 'Not Authorized',
+        password: 'Not Authorized',
       });
     }
 

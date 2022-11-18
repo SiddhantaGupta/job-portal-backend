@@ -8,6 +8,7 @@ import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 import { TimeoutInterceptor } from './timeoutInterceptor';
 import { SentryInterceptor } from './sentryInterceptor';
+import helmet from 'helmet';
 
 export class RestServer {
   private module: any;
@@ -26,6 +27,8 @@ export class RestServer {
     }
 
     app.enableCors({ origin: '*' });
+    app.use(helmet());
+    app.setGlobalPrefix('/api/v1');
 
     app.useGlobalGuards(new RequestGuard());
     const { httpAdapter } = app.get(HttpAdapterHost);
