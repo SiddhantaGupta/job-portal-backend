@@ -23,6 +23,7 @@ import { EmitEvent } from '@squareboat/nest-events';
 import { UserRequestedOtp } from '../events/userRequestedOtp';
 import { IUserModel } from '@app/user/interfaces';
 import { falseEmails } from '../falseEmails';
+import { UserResetPassword } from '../events/userResetPassword';
 
 @Injectable()
 export class AuthService {
@@ -265,6 +266,14 @@ export class AuthService {
       {
         password: newHashedPassword,
       },
+    );
+
+    EmitEvent(
+      new UserResetPassword({
+        email: validatedInputs.email,
+        subject: 'Password reset successfully',
+        message: `Your password has been updated.`,
+      }),
     );
 
     return { message: 'Password updated successfully' };
