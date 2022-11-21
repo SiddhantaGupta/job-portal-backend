@@ -131,10 +131,9 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new ValidationFailed({
-        email: 'Blocked User',
-        password: 'Blocked User',
-      });
+      throw new GenericException(
+        'Your account has been blocked. Please contact the Admin.',
+      );
     }
 
     let passwordVerified;

@@ -1,3 +1,4 @@
+import { GenericException } from '@libs/boat';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
@@ -14,11 +15,16 @@ export class RolesGuard implements CanActivate {
     if (!roles) {
       return true;
     }
+    const userRoles = this.config.get('settings.roles');
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    if ((user.role === 2 || user.role === 3) && !user.isActive) {
-      return false;
+    if (
+      (user.role === userRoles.recruiter ||
+        user.role === userRoles.candidate) &&
+      !user.isActive
+    ) {
+      throw new GenericException('Your account has been blocked by the admin');
     }
     return this.matchRoles(roles, user.role);
   }

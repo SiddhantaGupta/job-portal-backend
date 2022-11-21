@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Command, ConsoleIO } from '@squareboat/nest-console';
 import bcrypt from 'bcrypt';
+import { uuid } from 'uuidv4';
 import { UserModuleConstants } from '../constants';
 import { Admin } from '../dtos/admin';
 import { UserRepositoryContract } from '../repositories';
@@ -36,6 +37,8 @@ export class CreateAdmin {
 
     let user = await this.repo.create({
       ...validatedInputs,
+      isActive: true,
+      uuid: uuid(),
     });
 
     if (user) {
