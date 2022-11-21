@@ -15,7 +15,8 @@ export class JobRepository
   async search(inputs: IJobSearchModel): Promise<Pagination<IJobModel>> {
     const query = this.query();
     if (inputs.location) {
-      query.where('location', 'ilike', `%${inputs.location}%`);
+      query.where('title', 'ilike', `%${inputs.location}%`);
+      query.orWhere('location', 'ilike', `%${inputs.location}%`);
     }
     if (inputs.title) {
       query.where('title', 'ilike', `%${inputs.title}%`);
