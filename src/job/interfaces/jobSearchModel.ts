@@ -1,6 +1,5 @@
 export interface IJobSearchModel {
-  location: string;
-  title: string;
+  search: string;
   page: number;
   perPage: number;
   userId: number;
