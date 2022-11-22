@@ -72,7 +72,7 @@ export class AuthService {
     const emailProvider = userPayload.email.split('@')[1];
     if (falseEmails.includes(emailProvider)) {
       throw new ValidationFailed({
-        email: 'temporary email detected, please use a valid email address',
+        email: 'Temporary email detected, please use a valid email address',
       });
     }
 
@@ -152,10 +152,7 @@ export class AuthService {
     }
 
     if (user.role === userRoles.admin) {
-      throw new ValidationFailed({
-        email: 'Not Authorized',
-        password: 'Not Authorized',
-      });
+      throw new ForbiddenException('Not Authorized');
     }
 
     return {
@@ -246,9 +243,11 @@ export class AuthService {
       });
     }
 
-    let otpCheck = await CacheStore().has(
+    let otpInCache = await CacheStore().get(
       `${validatedInputs.email}_password_reset_otp`,
     );
+
+    let otpCheck = otpInCache === validatedInputs.otp;
 
     if (!otpCheck) {
       throw new ValidationFailed({
@@ -266,6 +265,8 @@ export class AuthService {
         password: newHashedPassword,
       },
     );
+
+    await CacheStore().forget(`${validatedInputs.email}_password_reset_otp`);
 
     EmitEvent(
       new UserResetPassword({

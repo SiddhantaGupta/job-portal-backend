@@ -59,10 +59,9 @@ export class AdminAuthService {
 
     const userRoles = this.config.get('settings.roles');
     if (!(user.role === userRoles.admin)) {
-      throw new ValidationFailed({
-        email: 'Incorrect Credentials',
-        password: 'Incorrect Credentials',
-      });
+      throw new ForbiddenException(
+        'You are not authorized to login to admin panel',
+      );
     }
 
     return {
