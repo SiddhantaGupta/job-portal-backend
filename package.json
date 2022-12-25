@@ -1,8 +1,7 @@
 {
-  "name": "nestjs-boilerplate",
+  "name": "job-portal",
   "version": "1.0.0",
-  "description": "A production ready NestJS boilerplate with batteries included. No Kidding!",
-  "author": "Vinayak Sarawagi <vinayaksarawagi25@gmail.com>",
+  "description": "",
   "private": false,
   "license": "MIT",
   "keywords": [

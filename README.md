@@ -1,29 +1,19 @@
-# README #
+## How to Run?
 
-This README would normally document whatever steps are necessary to get your application up and running.
+1. Clone the github repository.
+2. Install Node.js version between 16 and 18.
+3. populate the .env file.
+4. run command `npm install` to install all the dependencies for the project.
+5. run `node cli list` to get a list of commands. run commands to make migrations, start queue and create admin user in db.
+5. run command `npm start:dev` to start the development server.
+ 
+## About the project?
 
-### What is this repository for? ###
+Backend API for a job portal
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+## Tech Stack
 
-### How do I get set up? ###
-
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+- Nest.js
+- node.js version 16 to 18
+- Postgresql
+- Redis
